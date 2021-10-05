@@ -17,24 +17,22 @@ import tensorflow as tf
 
 LARGE_NUM = 1e9
 
+
 class SimCLR_loss(tf.keras.layers.Layer):
 
-    def __init__(self, temperature=1.0):
+    def __init__(self, temperature=1.0, normalize=True):
         super().__init__()
         self.temperature = temperature
+        self.normalize = normalize
 
     def call(self, x):
         
         #normalize to unit vectors
-        x = x/tf.norm(
-            x, ord='euclidean', axis=1, keepdims=True
-        )
-        
-        # x.shape = (2 * batch_size, embedding_dimension)
-        batch_size = x.shape[0]//2
+        # Get (normalized) hidden1 and hidden2.
+        if self.normalize:
+            x = tf.math.l2_normalize(x, -1)
 
-        embeddings_1 = x[:batch_size]
-        embeddings_2 = x[batch_size:]
+        embeddings_1, embeddings_2 = tf.split(x, 2, 0)
 
         masks = tf.one_hot(tf.range(batch_size), batch_size)
         labels = tf.one_hot(tf.range(batch_size), batch_size*2)
@@ -48,11 +46,11 @@ class SimCLR_loss(tf.keras.layers.Layer):
 
         losses_1 = tf.nn.softmax_cross_entropy_with_logits(
             labels, tf.concat([logits_12, logits_11], axis=1)
-            )
+        )
         losses_2 = tf.nn.softmax_cross_entropy_with_logits(
             labels, tf.concat([logits_21, logits_22], axis=1)
-            )
+        )
 
-        loss = tf.reduce_mean(tf.keras.layers.Add()([losses_1, losses_2]))
+        loss = losses_1 + losses_2
         
         return loss

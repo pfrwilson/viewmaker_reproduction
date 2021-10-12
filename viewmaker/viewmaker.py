@@ -2,6 +2,7 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 import tensorflow_lattice as tfl
 from conv_layer import ConvLayer
+from residual_block import ResidualBlock
 
 ACTIVATIONS = {
     'relu': tf.nn.ReLU,

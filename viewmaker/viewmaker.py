@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
 import tensorflow_lattice as tfl
-
+from conv_layer import ConvLayer
 
 ACTIVATIONS = {
     'relu': tf.nn.ReLU,

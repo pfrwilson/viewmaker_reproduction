@@ -13,3 +13,9 @@ TODO: need to determine how to initialize biases to 0 in the `zero_init` method.
 Not sure if we should be using `tf.keras.layers.Dense` for consistency or `tfl.layers.Linear` in the `zero_init` method ([reference](https://stackoverflow.com/questions/66626700/difference-between-tensorflows-tf-keras-layers-dense-and-pytorchs-torch-nn-lin)).
 
 I can't find a 2D inverse discrete cosine transform II function in tensorflow. I've only been able to find the 1D version [here](https://www.tensorflow.org/api_docs/python/tf/signal/idct).
+
+#### to do tomorrow:
+- configure libraries
+- check sample inputs, fix any bugs that may come up
+- compare outputs of sample inputs to original viewmaker. resolve issues or inconsistencies if any come up.
+- start training? 

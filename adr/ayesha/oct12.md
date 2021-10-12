@@ -18,4 +18,4 @@ I can't find a 2D inverse discrete cosine transform II function in tensorflow. I
 - configure libraries
 - check sample inputs, fix any bugs that may come up
 - compare outputs of sample inputs to original viewmaker. resolve issues or inconsistencies if any come up.
-- start training? 
+- work on setting up [encoder](https://github.com/alextamkin/viewmaker/blob/d9a7d4b05ac5126fe348c8c5217877ebcff7e2d7/src/systems/image_systems.py) and training (time permitting)

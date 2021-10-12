@@ -76,6 +76,68 @@ class Viewmaker(tf.keras.Model):
             batch_size = x.size(0)
             filter_size = x.size(-1)
             shp = (batch_size, num, filter_size, filter_size)
-            bound_multiplier = torch.tensor(bound_multiplier, device=x.device)
-            noise = torch.rand(shp, device=x.device) * bound_multiplier.view(-1, 1, 1, 1)
-            return torch.cat((x, noise), dim=1)
+            bound_multiplier = tf.convert_to_tensor(bound_multiplier) # removed `device` parameter
+            noise = tf.random.uniform(shp) * bound_multiplier.view(-1, 1, 1, 1) # removed `device` parameter
+            return tf.concatenate((x, noise), axis=1)
+
+        def basic_net(self, y, num_res_blocks=5, bound_multiplier=1):
+            if num_res_blocks not in list(range(6)):
+                raise ValueError(f'num_res_blocks must be in {list(range(6))}, got {num_res_blocks}.')
+
+            y = self.add_noise_channel(y, bound_multiplier=bound_multiplier)
+            y = self.act(self.in1(self.conv1(y)))
+            y = self.act(self.in2(self.conv2(y)))
+            y = self.act(self.in3(self.conv3(y)))
+
+            # Features that could be useful for other auxilary layers / losses.
+            # [batch_size, 128]
+            features = y.clone().mean([-1, -2])
+        
+            for i, res in enumerate([self.res1, self.res2, self.res3, self.res4, self.res5]):
+                if i < num_res_blocks:
+                    y = res(self.add_noise_channel(y, bound_multiplier=bound_multiplier))
+
+            y = self.act(self.in4(self.deconv1(y)))
+            y = self.act(self.in5(self.deconv2(y)))
+            y = self.deconv3(y)
+
+            return y, features
+
+        def get_delta(self, y_pixels, eps=1e-4):
+            '''Constrains the input perturbation by projecting it onto an L1 sphere'''
+            distortion_budget = self.distortion_budget
+            delta = tf.keras.activations.tanh(y_pixels) # Project to [-1, 1]
+            avg_magnitude = delta.abs().mean([1,2,3], keepdim=True)
+            max_magnitude = distortion_budget
+            delta = delta * max_magnitude / (avg_magnitude + eps)
+            return delta
+        
+        def forward(self, x):
+            if self.downsample_to:
+                # Downsample.
+                x_orig = x
+                x = tfa.image.interpolate_bilinear(x)
+            y = x
+            
+            if self.frequency_domain:
+                # Input to viewmaker is in frequency domain, outputs frequency domain perturbation.
+                # Uses the Discrete Cosine Transform.
+                # shape still [batch_size, C, W, H]
+                y = tf.signal.dct(y, type=2)
+    
+            y_pixels, features = self.basic_net(y, self.num_res_blocks, bound_multiplier=1)
+            delta = self.get_delta(y_pixels)
+            if self.frequency_domain:
+                # Compute inverse DCT from frequency domain to time domain.
+                delta = tf.signal.idct(delta, type=2)
+            if self.downsample_to:
+                # Upsample.
+                x = x_orig
+                delta = tfa.image.interpolate_bilinear(delta)
+    
+            # Additive perturbation
+            result = x + delta
+            if self.clamp:
+                result = tf.clip_by_value(result, 0, 1.0)
+    
+            return result

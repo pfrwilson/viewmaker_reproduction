@@ -113,7 +113,7 @@ class Viewmaker(tf.keras.Model):
             delta = delta * max_magnitude / (avg_magnitude + eps)
             return delta
         
-        def forward(self, x):
+        def call(self, x):
             if self.downsample_to:
                 # Downsample.
                 x_orig = x

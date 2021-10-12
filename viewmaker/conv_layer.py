@@ -10,7 +10,7 @@ class ConvLayer(tf.keras.Model):
                                             stride, 
                                             data_format='channels_first')
 
-    def forward(self, x):
+    def call(self, x):
         out = self.reflection_pad(x)
         out = self.conv2d(out)
         return out

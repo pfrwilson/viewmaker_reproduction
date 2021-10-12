@@ -17,7 +17,7 @@ class UpsampleConvLayer(tf.keras.Model):
                                             stride,
                                             data_format='channels_first')
 
-    def forward(self, x):
+    def call(self, x):
         x_in = x
         if self.upsample:
             x_in = tf.image.resize(x_in, method=ResizeMethod.NEAREST_NEIGHBOR)

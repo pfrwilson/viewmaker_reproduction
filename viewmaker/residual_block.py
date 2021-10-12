@@ -21,7 +21,7 @@ class ResidualBlock(tf.keras.Model):
         self.in2 = tfa.layers.InstanceNormalization()
         self.act = ACTIVATIONS[activation]()
 
-    def forward(self, x):
+    def call(self, x):
         residual = x
         out = self.act(self.in1(self.conv1(x)))
         out = self.in2(self.conv2(out))

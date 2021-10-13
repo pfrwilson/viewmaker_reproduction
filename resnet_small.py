@@ -17,10 +17,12 @@ class BasicBlock(layers.Layer):
         #shortcut connection (either identity or convolution to match output shape)
         self.shortcut = tf.keras.Sequential()
         if in_planes != planes or strides != 1:
-            self.shortcut.add([
-                layers.Conv2D(planes, (1, 1), strides=strides, use_bias=False),
+            self.shortcut.add(
+                layers.Conv2D(planes, (1, 1), strides=strides, use_bias=False)
+            )
+            self.shortcut.add(
                 layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-            ])
+            )
 
     def call(self, x):
         residual = self.shortcut(x)
@@ -39,33 +41,35 @@ class Bottleneck(layers.Layer):
 
     def __init__(self, in_planes, planes, strides=1):
         super(Bottleneck, self).__init__() 
-        self.conv1 = layers.Conv2d(planes, (1, 1), strides=strides, padding='same', use_bias=False)
+        self.conv1 = layers.Conv2D(planes, (1, 1), padding='same', use_bias=False)
         self.bn1 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-        self.conv2 = layers.Conv2d(planes, (3, 3), strides=strides, padding='same', use_bias=False)
+        self.conv2 = layers.Conv2D(planes, (3, 3), strides=strides, padding='same', use_bias=False)
         self.bn2 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-        self.conv3 = layers.Conv2d(planes*self.expansion, (1, 1), padding='same', use_bias=False)
+        self.conv3 = layers.Conv2D(planes*self.expansion, (1, 1), padding='same', use_bias=False)
         self.bn3 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
 
         self.shortcut = tf.keras.Sequential()
         if in_planes != planes*self.expansion or strides != 1:
-            self.shortcut.add([
-                layers.Conv2D(planes*self.expansion, (1, 1), strides=strides, use_bias=False), 
+            self.shortcut.add(
+                layers.Conv2D(planes*self.expansion, (1, 1), strides=strides, use_bias=False)
+            )
+            self.shortcut.add(
                 layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-            ])
+            )
 
-        def call(self, x):
-            residual = self.shorcut(x)
-            x = self.conv1(x)
-            x = self.bn1(x)
-            x = layers.ReLU()(x)
-            x = self.conv2(x)
-            x = self.bn2(x)
-            x = layers.ReLU(x)
-            x = self.conv3(x)
-            x = self.bn3(x)
-            x = layers.Add()([x, residual])
-            x = layers.ReLU()(x)
-            return x 
+    def call(self, x):
+        residual = self.shortcut(x)
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = layers.ReLU()(x)
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = layers.ReLU()(x)
+        x = self.conv3(x)
+        x = self.bn3(x)
+        x = layers.Add()([x, residual])
+        x = layers.ReLU()(x)
+        return x 
 
 
 class ResNet(tf.keras.Model):

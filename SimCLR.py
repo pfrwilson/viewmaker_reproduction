@@ -57,8 +57,8 @@ class SimCLR_adversarial(tf.keras.Model):
         self.projection_head = projection_head
 
     def compile(self, optimizer, loss_fn=AdversarialSimCLRLoss()):
-        self.encoder_optimizer = optimizer.copy()
-        self
+        super(SimCLR_adversarial, self).compile()
+        self.encoder_optimizer = optimizer
         # loss_fn must return (loss, adversarial_loss)
         self.loss_fn = loss_fn
 

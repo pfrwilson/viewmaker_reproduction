@@ -1,8 +1,6 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
 import tensorflow_lattice as tfl
-from conv_layer import ConvLayer
-from residual_block import ResidualBlock
 
 ACTIVATIONS = {
     'relu': tf.nn.relu,
@@ -142,3 +140,64 @@ class Viewmaker(tf.keras.Model):
                 result = tf.clip_by_value(result, 0, 1.0)
     
             return result
+
+class ConvLayer(tf.keras.Model):
+    def __init__(self, in_channels, out_channels, kernel_size, stride):
+        super(ConvLayer, self).__init__()
+        reflection_padding = kernel_size // 2
+        self.reflection_pad = tf.pad(reflection_padding)
+        self.conv2d = tf.keras.layers.Conv2D(out_channels,
+                                            kernel_size, 
+                                            stride, 
+                                            data_format='channels_first')
+
+    def call(self, x):
+        out = self.reflection_pad(x)
+        out = self.conv2d(out)
+        return out
+
+class ResidualBlock(tf.keras.Model):
+    """ResidualBlock
+    introduced in: https://arxiv.org/abs/1512.03385
+    recommended architecture: http://torch.ch/blog/2016/02/04/resnets.html
+    """
+
+    def __init__(self, channels, activation='relu'):
+        super(ResidualBlock, self).__init__()
+        self.conv1 = ConvLayer(channels, channels, kernel_size=3, stride=1)
+        self.in1 = tfa.layers.InstanceNormalization()
+        self.conv2 = ConvLayer(channels, channels, kernel_size=3, stride=1)
+        self.in2 = tfa.layers.InstanceNormalization()
+        self.act = ACTIVATIONS[activation]()
+
+    def call(self, x):
+        residual = x
+        out = self.act(self.in1(self.conv1(x)))
+        out = self.in2(self.conv2(out))
+        out = out + residual
+        return out
+
+class UpsampleConvLayer(tf.keras.Model):
+    """UpsampleConvLayer
+    Upsamples the input and then does a convolution. This method gives better results
+    compared to ConvTranspose2d.
+    ref: http://distill.pub/2016/deconv-checkerboard/
+    """
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride, upsample=None):
+        super(UpsampleConvLayer, self).__init__()
+        self.upsample = upsample
+        reflection_padding = kernel_size // 2
+        self.reflection_pad = tf.pad(reflection_padding)
+        self.conv2d = tf.keras.layers.Conv2D(out_channels, 
+                                            kernel_size, 
+                                            stride,
+                                            data_format='channels_first')
+
+    def call(self, x):
+        x_in = x
+        if self.upsample:
+            x_in = tf.image.resize(x_in, method=ResizeMethod.NEAREST_NEIGHBOR)
+        out = self.reflection_pad(x_in)
+        out = self.conv2d(out)
+        return out

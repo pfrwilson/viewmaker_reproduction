@@ -3,7 +3,7 @@ import tensorflow_addons as tfa
 from conv_layer import ConvLayer
 
 ACTIVATIONS = {
-    'relu': tf.nn.ReLU,
+    'relu': tf.nn.relu,
     'leaky_relu': tf.nn.leaky_relu,
 }
 

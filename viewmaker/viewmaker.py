@@ -5,7 +5,7 @@ from conv_layer import ConvLayer
 from residual_block import ResidualBlock
 
 ACTIVATIONS = {
-    'relu': tf.nn.ReLU,
+    'relu': tf.nn.relu,
     'leaky_relu': tf.nn.leaky_relu,
 }
 

@@ -33,6 +33,7 @@ class SimCLR_loss(tf.keras.layers.Layer):
             x = tf.math.l2_normalize(x, -1)
 
         embeddings_1, embeddings_2 = tf.split(x, 2, 0)
+        batch_size = tf.shape(embeddings_1)[0]
 
         masks = tf.one_hot(tf.range(batch_size), batch_size)
         labels = tf.one_hot(tf.range(batch_size), batch_size*2)
@@ -54,3 +55,18 @@ class SimCLR_loss(tf.keras.layers.Layer):
         loss = losses_1 + losses_2
         
         return loss
+
+class AdversarialSimCLRLoss(tf.keras.layers.Layer):
+
+    def __init__(self, viewmaker_loss_weight=1.0, temperature=1.0, normalize=True):
+        super().__init__()
+        self.temperature = temperature
+        self.normalize = normalize
+        self.viewmaker_loss_weight=viewmaker_loss_weight
+    
+    def call(self, x):
+        simclr_loss = SimCLR_loss(self.temperature, self.normalize)(x)
+        viewmaker_loss = -simclr_loss * self.viewmaker_loss_weight
+        return simclr_loss, viewmaker_loss
+
+

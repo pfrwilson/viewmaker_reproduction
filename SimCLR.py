@@ -5,8 +5,12 @@ class SimCLR(tf.keras.Model):
 
     def __init__(self, encoder, augmentation, projection_head):
         super(SimCLR, self).__init__()
-        self.encoder = encoder                     
-        self.projection_head = projection_head     
+        # encoder: callable on input data - returns a high-dimensional representation of its input
+        self.encoder = encoder   
+        # projection head - callable on the output of the encoding layer - projects high dimensional 
+        # data into a lower dimension       
+        self.projection_head = projection_head    
+        # augmentation layer - callable, layer maps input to "augmented" view of input 
         self.augmentation = augmentation
     
     def compile(self, optimizer, loss_fn = SimCLR_loss()):
@@ -17,8 +21,8 @@ class SimCLR(tf.keras.Model):
     def train_step(self, data):
 
         # generate views of the data
-        data_view1 = tf.map_fn(self.augmentation, data)
-        data_view2 = tf.map_fn(self.augmentation, data)
+        data_view1 = self.augmentation(data)
+        data_view2 = self.augmentation(data)
 
         # concatenate views for input to encoder
         X = tf.concat([data_view1, data_view2], axis=0)

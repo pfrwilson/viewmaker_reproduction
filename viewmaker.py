@@ -35,7 +35,7 @@ class Viewmaker(tf.keras.Model):
         self.frequency_domain = frequency_domain
         self.downsample_to = downsample_to 
         self.distortion_budget = distortion_budget
-        self.act = ACTIVATIONS[activation]
+        self.act = ACTIVATIONS[activation]()
 
         # Initial convolution layers (+ 1 for noise filter)
         self.conv1 = ConvLayer(self.num_channels + 1, 32, kernel_size=9, stride=1)
@@ -70,12 +70,13 @@ class Viewmaker(tf.keras.Model):
             
     def add_noise_channel(self, x, num=1, bound_multiplier=1):
         # bound_multiplier is a scalar or a 1D tensor of length batch_size
-        batch_size = x.size(0)
-        filter_size = x.size(-1)
-        shp = (batch_size, num, filter_size, filter_size)
-        bound_multiplier = tf.convert_to_tensor(bound_multiplier) # removed `device` parameter
-        noise = tf.random.uniform(shp) * bound_multiplier.view(-1, 1, 1, 1) # removed `device` parameter
-        return tf.concatenate((x, noise), axis=1)
+        batch_size = x.get_shape()[0]
+        filter_size = x.get_shape()[-2]
+        shp = (batch_size, filter_size, filter_size, num)
+        bound_multiplier = tf.constant(bound_multiplier, shape=shp, dtype=float)
+        noise = tf.random.uniform(shp) * bound_multiplier # removed `device` parameter
+        # print(noise)
+        return tf.concat([x, noise], axis=3)
 
     def basic_net(self, y, num_res_blocks=5, bound_multiplier=1):
         if num_res_blocks not in list(range(6)):
@@ -86,7 +87,7 @@ class Viewmaker(tf.keras.Model):
         y = self.act(self.in3(self.conv3(y)))
         # Features that could be useful for other auxilary layers / losses.
         # [batch_size, 128]
-        features = y.clone().mean([-1, -2])
+        features = tf.math.reduce_mean(tf.identity(y), [-1, -2])
     
         for i, res in enumerate([self.res1, self.res2, self.res3, self.res4, self.res5]):
             if i < num_res_blocks:
@@ -100,7 +101,7 @@ class Viewmaker(tf.keras.Model):
         '''Constrains the input perturbation by projecting it onto an L1 sphere'''
         distortion_budget = self.distortion_budget
         delta = tf.keras.activations.tanh(y_pixels) # Project to [-1, 1]
-        avg_magnitude = delta.abs().mean([1,2,3], keepdim=True)
+        avg_magnitude = tf.math.reduce_mean(tf.math.abs(delta), [1,2,3], keepdims=True)
         max_magnitude = distortion_budget
         delta = delta * max_magnitude / (avg_magnitude + eps)
         return delta
@@ -138,17 +139,16 @@ class Viewmaker(tf.keras.Model):
 class ConvLayer(tf.keras.Model):
     def __init__(self, in_channels, out_channels, kernel_size, stride):
         super(ConvLayer, self).__init__()
-        reflection_padding = kernel_size // 2
-        self.reflection_pad = tf.keras.layers.ZeroPadding2D(reflection_padding)
+        # reflection_padding = kernel_size // 2
+        # self.reflection_pad = tf.keras.layers.ZeroPadding2D(reflection_padding)
         self.conv2d = tf.keras.layers.Conv2D(out_channels,
-                                            kernel_size, 
-                                            stride, 
-                                            data_format='channels_first')
+                                            kernel_size,
+                                            stride,
+                                            padding="same",)
 
     def call(self, x):
-        out = self.reflection_pad(x)
-        out = self.conv2d(out)
-        return out
+        # out = self.reflection_pad(x)
+        return self.conv2d(x)
 
 class ResidualBlock(tf.keras.Model):
     """ResidualBlock
@@ -191,7 +191,9 @@ class UpsampleConvLayer(tf.keras.Model):
     def call(self, x):
         x_in = x
         if self.upsample:
-            x_in = tf.image.resize(x_in, method=ResizeMethod.NEAREST_NEIGHBOR)
+            x_in = tf.image.resize(x_in, 
+                                    (x_in.shape[1]*self.upsample, x_in.shape[2]*self.upsample), 
+                                    method='nearest')
         out = self.reflection_pad(x_in)
         out = self.conv2d(out)
         return out

@@ -63,12 +63,10 @@ class Viewmaker(tf.keras.Model):
     def zero_init(m):
         if isinstance(m, (tfl.layers.Linear, tf.keras.layers.Conv2D)):
             # actual 0 has symmetry problems
-            tf.random.normal(m.weights, mean=0, stddev=1e-4)
-            # init.constant_(m.weight.data, 0)
-            # TODO: determine how to initalize biases to 0. afaik these are not cleanly separable.
-            # init.constant_(m.bias.data, 0)
-        elif isinstance(m, tf.keras.layers.BatchNormalization):
-            pass
+            m.weights = tf.random.normal(m.weights, mean=0, stddev=1e-4)
+            m.bias = tf.convert_to_tensor(np.zeros(shape(m.bias)))
+        # elif isinstance(m, tf.keras.layers.BatchNormalization):
+        #     pass
             
     def add_noise_channel(self, x, num=1, bound_multiplier=1):
         # bound_multiplier is a scalar or a 1D tensor of length batch_size
@@ -114,17 +112,17 @@ class Viewmaker(tf.keras.Model):
             x = tfa.image.interpolate_bilinear(x)
         y = x
         
-        if self.frequency_domain:
-            # Input to viewmaker is in frequency domain, outputs frequency domain perturbation.
-            # Uses the Discrete Cosine Transform.
-            # shape still [batch_size, C, W, H]
-            y = tf.signal.dct(y, type=2)
+        # if self.frequency_domain:
+        #     # Input to viewmaker is in frequency domain, outputs frequency domain perturbation.
+        #     # Uses the Discrete Cosine Transform.
+        #     # shape still [batch_size, C, W, H]
+        #     y = tf.signal.dct(y, type=2)
 
         y_pixels, features = self.basic_net(y, self.num_res_blocks, bound_multiplier=1)
         delta = self.get_delta(y_pixels)
-        if self.frequency_domain:
-            # Compute inverse DCT from frequency domain to time domain.
-            delta = tf.signal.idct(delta, type=2)
+        # if self.frequency_domain:
+        #     # Compute inverse DCT from frequency domain to time domain.
+        #     delta = tf.signal.idct(delta, type=2)
         if self.downsample_to:
             # Upsample.
             x = x_orig

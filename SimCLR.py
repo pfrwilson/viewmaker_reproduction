@@ -71,8 +71,8 @@ class SimCLR(tf.keras.Model):
     def _compute_accuracy(labels, logits):
         predictions = tf.argmax(logits, axis=1)
         labels = tf.argmax(labels, axis=1)
-        batch_size = tf.shape(labels)[0]
-        accuracy = tf.reduce_sum(tf.cast(tf.equal(predictions, labels), 'int32'))/(batch_size*2)
+        n_labels = tf.shape(labels)[0]
+        accuracy = tf.reduce_sum(tf.cast(tf.equal(predictions, labels), 'int32'))/(n_labels)
         return accuracy
 
 class SimCLR_adversarial(SimCLR):

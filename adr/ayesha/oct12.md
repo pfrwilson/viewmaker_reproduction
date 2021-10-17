@@ -6,6 +6,8 @@ I didn't find an `affine` parameter in the [tensorflow docs](https://www.tensorf
 
 [This line](https://github.com/alextamkin/viewmaker/blob/d9a7d4b05ac5126fe348c8c5217877ebcff7e2d7/src/models/viewmaker.py#L74) uses `m.weight.data` to initalize all parameters to a normal distribution. However, I can't find much documentation for the weight class (it looks like it's just a matrix of weights [here](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html), and as far as I know matrices don't have a `data` parameter. Will use `m.weights` for now, and try to rectify if I run into any issues.
 
+Oct 15-17: decided to remove the `bound_multiplier` parameter since it is set to 1 by the call() function.
+
 #### todos/ concerns/ issues
 
 TODO: need to determine how to initialize biases to 0 in the `zero_init` method. Afaik, the only way to get a layer's weights is using `m.weights`, as documented [here](https://www.tensorflow.org/lattice/api_docs/python/tfl/layers/Linear), which seems to hold both weights and biases. For now, all the weights and biases are being initialized with the normal distribution, but this needs to be rectified to exclude the biases, which have to be initialized to 0. An idea for how to do this can be found [here](https://stackoverflow.com/questions/41821502/zero-initialiser-for-biases-using-get-variable-in-tensorflow).

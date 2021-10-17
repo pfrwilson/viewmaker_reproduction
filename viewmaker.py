@@ -1,6 +1,7 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
 import tensorflow_lattice as tfl
+import numpy as np
 
 ACTIVATIONS = {
     'relu': tf.keras.layers.ReLU,
@@ -70,12 +71,10 @@ class Viewmaker(tf.keras.Model):
             
     def add_noise_channel(self, x, num=1, bound_multiplier=1):
         # bound_multiplier is a scalar or a 1D tensor of length batch_size
-        batch_size = x.get_shape()[0]
-        filter_size = x.get_shape()[-2]
-        shp = (batch_size, filter_size, filter_size, num)
-        bound_multiplier = tf.constant(bound_multiplier, shape=shp, dtype=float)
-        noise = tf.random.uniform(shp) * bound_multiplier # removed `device` parameter
-        # print(noise)
+        shp = tf.shape(x)
+        #bound_multiplier = tf.constant(bound_multiplier, shape=shp, dtype='float32')
+        noise = tf.random.uniform(shp) #* bound_multiplier # removed `device` parameter
+        noise = noise[:, :, :, :1]
         return tf.concat([x, noise], axis=3)
 
     def basic_net(self, y, num_res_blocks=5, bound_multiplier=1):
@@ -119,7 +118,7 @@ class Viewmaker(tf.keras.Model):
         #     # shape still [batch_size, C, W, H]
         #     y = tf.signal.dct(y, type=2)
 
-        y_pixels, features = self.basic_net(y, self.num_res_blocks, bound_multiplier=1)
+        y_pixels, features = self.basic_net(y, self.num_res_blocks, bound_multiplier=1.0)
         delta = self.get_delta(y_pixels)
         # if self.frequency_domain:
         #     # Compute inverse DCT from frequency domain to time domain.
@@ -136,7 +135,7 @@ class Viewmaker(tf.keras.Model):
 
         return result
 
-class ConvLayer(tf.keras.Model):
+class ConvLayer(tf.keras.layers.Layer):
     def __init__(self, in_channels, out_channels, kernel_size, stride):
         super(ConvLayer, self).__init__()
         # reflection_padding = kernel_size // 2
@@ -144,13 +143,13 @@ class ConvLayer(tf.keras.Model):
         self.conv2d = tf.keras.layers.Conv2D(out_channels,
                                             kernel_size,
                                             stride,
-                                            padding="same",)
+                                            padding="same")
 
     def call(self, x):
         # out = self.reflection_pad(x)
         return self.conv2d(x)
 
-class ResidualBlock(tf.keras.Model):
+class ResidualBlock(tf.keras.layers.Layer):
     """ResidualBlock
     introduced in: https://arxiv.org/abs/1512.03385
     recommended architecture: http://torch.ch/blog/2016/02/04/resnets.html
@@ -171,7 +170,7 @@ class ResidualBlock(tf.keras.Model):
         out = out + residual
         return out
 
-class UpsampleConvLayer(tf.keras.Model):
+class UpsampleConvLayer(tf.keras.layers.Layer):
     """UpsampleConvLayer
     Upsamples the input and then does a convolution. This method gives better results
     compared to ConvTranspose2d.
@@ -192,7 +191,7 @@ class UpsampleConvLayer(tf.keras.Model):
         x_in = x
         if self.upsample:
             x_in = tf.image.resize(x_in, 
-                                    (x_in.shape[1]*self.upsample, x_in.shape[2]*self.upsample), 
+                                    (tf.shape(x_in)[1]*self.upsample, tf.shape(x_in)[2]*self.upsample), 
                                     method='nearest')
         out = self.reflection_pad(x_in)
         out = self.conv2d(out)

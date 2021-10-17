@@ -113,7 +113,7 @@ class SimCLR_adversarial(SimCLR):
         encoder_grads = grad.gradient(loss, encoder_weights)
         projection_head_weights = self.projection_head.trainable_weights
         projection_head_grads = grad.gradient(loss, projection_head_weights)
-        viewmaker_weights = self.viewmaker.trainable_weights
+        viewmaker_weights = self.augmentation.trainable_weights
         viewmaker_grads = grad.gradient(viewmaker_loss, viewmaker_weights)
 
         weights = []

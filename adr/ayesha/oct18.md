@@ -1,0 +1,1 @@
+trained logistic regression model on simclr encoder for about 500 epochs, loss plateaued at 75%. We think we'll have to pretrain simclr for longer next time. 

@@ -5,7 +5,7 @@ class SimCLR(tf.keras.Model):
     def __init__(
             self, 
             encoder, 
-            augmentation, 
+            viewmaker, # a non-trainable viewmaker layer
             projection_head, 
             temperature=1.0, 
             normalize=True
@@ -13,7 +13,7 @@ class SimCLR(tf.keras.Model):
         super(SimCLR, self).__init__()
         self.encoder = encoder   
         self.projection_head = projection_head    
-        self.augmentation = augmentation    
+        self.viewmaker = viewmaker    
         self.embeddings_to_logits = SimCLR_logits_from_embeddings(
             temperature=temperature, 
             normalize=normalize
@@ -28,8 +28,8 @@ class SimCLR(tf.keras.Model):
 
     def call(self, x):
         # generates views of the data
-        data_view1 = self.augmentation(x)
-        data_view2 = self.augmentation(x)
+        data_view1 = self.viewmaker(x)
+        data_view2 = self.viewmaker(x)
         batch_size = tf.shape(x)[0]
 
         # concatenate views for input to encoder

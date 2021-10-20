@@ -6,15 +6,28 @@ This repository contains a reproduction of the paper [Viewmaker Networks: Learni
 
 ## Requirements
 
-In cloned repository:
+We performed our experiments on a ubuntu linux machine with tensorflow version 2.6.0, CUDA version 9.1, and CUDnn version 
+
+To install the necessary dependencies, run 
+```
+pip install -r requirements.txt
+```
+
+The command
+```
+source init_env.sh
+```
+is necessary to allow absolute imports and run the script files. 
+
+Complete environment setup:
 ```setup
+git clone https://github.com/pfrwilson/viewmaker_reproduction
+cd viewmaker_reproduction
 conda create -n my_env
 conda activate my_env
-pip install -r requirements.txt
 source init_env.sh
 ```
 
->📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...
 
 ## Training
 

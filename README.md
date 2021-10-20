@@ -6,10 +6,12 @@ This repository contains a reproduction of the paper [Viewmaker Networks: Learni
 
 ## Requirements
 
-To install requirements:
-
+In cloned repository:
 ```setup
+conda create -n my_env
+conda activate my_env
 pip install -r requirements.txt
+source init_env.sh
 ```
 
 >📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...

@@ -1,15 +1,22 @@
 import tensorflow as tf
-import tensorflow_lattice as tfl
 
-class TrainClassifier(tf.keras.Model):
-    
-    def __init__(self, num_classes, encoder):
-        super().__init__()
-        self.encoder = encoder
-        self.reg = tf.keras.layers.Dense(num_classes)#, activation='softmax')
-        self.encoder.trainable = False 
+def get_transfer_logistic_regression(encoder, num_classes) -> tf.keras.Model:
+    classifier = tf.keras.layers.Dense(num_classes)
+    return get_transfer_model(encoder, classifier)
 
-    def call(self, x):
-        output = self.reg(self.encoder(x))
-        return output 
+def get_transfer_model(encoder, classifier) -> tf.keras.Model:
     
+    # freeze encoder weights
+    encoder.trainable = False
+
+    return tf.keras.Sequential([
+        encoder, 
+        classifier
+    ])
+
+def get_finetune_model(encoder, classifier) -> tf.keras.Model:
+
+    return tf.keras.Sequential([
+        encoder, 
+        classifier
+    ])

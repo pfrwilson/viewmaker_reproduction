@@ -25,6 +25,7 @@ def get_args():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str, default='.', help='where to save the model weights')
+    parser.add_argument('--load_filepath', type=str, default=None)
     parser.add_argument('--epochs', type=int, default=200, help='')
     args = parser.parse_args()
     return args
@@ -35,20 +36,22 @@ ARGS = get_args()
 def get_encoder():
     encoder_base = ResNet18(10)
     encoder = tf.keras.Sequential(
-        encoder_base.layers[:-1]
+        encoder_base.layers[:-1],
+        name='encoder'
     )
     return encoder
 
 def get_projection_head():
     # no additional projection head
-    return tf.keras.Sequential([
-        tf.keras.layers.Dense(PARAMS['embedding_dim'], activation=None)
-    ])
+    return tf.keras.Sequential(
+        [tf.keras.layers.Dense(PARAMS['embedding_dim'], activation=None)],
+        name='projection_head'
+    )
 
 def get_viewmaker():
     class MyViewmaker(tf.keras.layers.Layer):
         def __init__(self):
-            super().__init__()
+            super().__init__(name='expert_augmentation_viewmaker')
         def call(self, x):
             augment_image = lambda im: preprocess_for_train(im, 32, 32)
             return tf.map_fn(augment_image, x)
@@ -63,7 +66,17 @@ def run_training():
     viewmaker = get_viewmaker()
     projection_head = get_projection_head()
     
-    model = SimCLR(encoder, viewmaker, projection_head, PARAMS['temperature'])
+    model = SimCLR(encoder, 
+        viewmaker, 
+        projection_head, 
+        temperature=PARAMS['temperature'],
+        name='SimCLR_model'
+    )
+    model(next(iter(dataset))) #build model
+    print(model.summary())
+
+    if ARGS.load_filepath: 
+        model.load_weights(ARGS.load_filepath)
 
     optimizer = tfa.optimizers.SGDW(
         learning_rate = PARAMS['learning_rate'],

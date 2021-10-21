@@ -2,3 +2,4 @@ env
 test.ipynb
 __pycache__
 cifar_10_experiment/
+.idea

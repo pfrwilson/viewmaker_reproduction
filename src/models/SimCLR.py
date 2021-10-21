@@ -8,9 +8,10 @@ class SimCLR(tf.keras.Model):
             viewmaker, # a non-trainable viewmaker layer
             projection_head, 
             temperature=1.0, 
-            normalize=True
+            normalize=True, 
+            **kwargs
         ):
-        super(SimCLR, self).__init__()
+        super(SimCLR, self).__init__(**kwargs)
         self.encoder = encoder   
         self.projection_head = projection_head    
         self.viewmaker = viewmaker    

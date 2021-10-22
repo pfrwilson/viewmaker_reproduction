@@ -57,7 +57,6 @@ def get_viewmaker(params):
             return tf.map_fn(augment_image, x)
     return MyViewmaker()
 
-
 def get_dataset(params):
     dataset = get_unsupervised_dataset(batch_size=params['batch_size'])
     return dataset
@@ -75,7 +74,7 @@ def run_training(params, args):
         temperature=params['temperature'],
         name='SimCLR_model'
     )
-    model(next(iter(dataset))) #build model
+    model(next(iter(dataset))) #build model by calling on batch - necessary for loading weights
     print(model.summary())
 
     if args.load_filepath: 

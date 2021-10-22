@@ -14,6 +14,7 @@ def get_unsupervised_dataset(batch_size):
 
     dataset = tf.data.Dataset.from_tensor_slices(x)
     dataset = dataset.batch(batch_size)
+    dataset = dataset.take(len(dataset)-1)
 
     return dataset
 
@@ -29,3 +30,7 @@ def get_supervised_dataset():
     y_test = tf.squeeze(tf.one_hot(y_test, depth=10), axis=1)
 
     return (x_train, y_train), (x_test, y_test)
+
+def get_augmented_dataset():
+    pass 
+    #TODO

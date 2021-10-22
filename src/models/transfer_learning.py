@@ -1,22 +1,31 @@
 import tensorflow as tf
 
-def get_transfer_logistic_regression(encoder, num_classes) -> tf.keras.Model:
-    classifier = tf.keras.layers.Dense(num_classes)
-    return get_transfer_model(encoder, classifier)
+def get_transfer_classifier(viewmaker, encoder, num_classes):
+    return TransferModel(
+        viewmaker, 
+        encoder, 
+        tf.keras.Dense(num_classes),
+        )
 
-def get_transfer_model(encoder, classifier) -> tf.keras.Model:
+class TransferModel(tf.keras.Model):
+    def __init__(
+        self, 
+        encoder,
+        classifier,
+        viewmaker = None, #optional augmentation layer for training
+        freeze_encoder_weights = True,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.viewmaker = viewmaker
+        self.encoder = encoder
+        if freeze_encoder_weights:
+            self.encoder.trainable=False
+        self.classifier = classifier
     
-    # freeze encoder weights
-    encoder.trainable = False
-
-    return tf.keras.Sequential([
-        encoder, 
-        classifier
-    ])
-
-def get_finetune_model(encoder, classifier) -> tf.keras.Model:
-
-    return tf.keras.Sequential([
-        encoder, 
-        classifier
-    ])
+    def call(self, x, training=False):
+        if training and self.viewmaker:
+            x = self.viewmaker(x)
+        x = self.encoder(x)
+        logits = self.classifier(x)
+        return logits

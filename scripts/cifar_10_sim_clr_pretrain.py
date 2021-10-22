@@ -60,17 +60,14 @@ def get_viewmaker(params):
 
 def get_dataset(params):
     dataset = get_unsupervised_dataset(batch_size=params['batch_size'])
-    # model needs batch of EXACTLY batch_size -- leave out last batch:
-    dataset = dataset.take(len(dataset)-1) 
-
+    return dataset
 
 def run_training(params, args):
 
-    dataset = get_dataset(params, args)
-
-    encoder = get_encoder()
-    viewmaker = get_viewmaker()
-    projection_head = get_projection_head()
+    dataset = get_dataset(params)
+    encoder = get_encoder(params)
+    viewmaker = get_viewmaker(params)
+    projection_head = get_projection_head(params)
     
     model = SimCLR(encoder, 
         viewmaker, 
@@ -91,7 +88,7 @@ def run_training(params, args):
     )
     model.compile(optimizer=optimizer)
 
-    model.fit(dataset, epochs=args.epochs)
+    model.fit(dataset, epochs=params['epochs'])
 
     filepath = os.path.join(args.save_dir, 'model_weights.h5')
     model.save_weights(filepath)
@@ -99,12 +96,12 @@ def run_training(params, args):
 if __name__ == '__main__':
 
     args = get_args()
-    if args.params:
+    if args.params_filepath:
         import json
-        with open(args.params) as params_json:
+        with open(args.params_filepath) as params_json:
             params = json.load(params_json)
     else:
         params = DEFAULT_PARAMS
 
-    run_training()
+    run_training(params, args)
 

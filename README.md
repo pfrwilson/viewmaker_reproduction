@@ -2,8 +2,6 @@
 
 This repository contains a reproduction of the paper [Viewmaker Networks: Learning Views for Unsupervised Representation Learning ](https://arxiv.org/abs/2010.07432). 
 
->📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials
-
 ## Requirements
 
 We performed our experiments on a ubuntu linux machine with tensorflow version 2.6.0, CUDA version 9.1, and CUDnn version 8.2.4
@@ -34,10 +32,10 @@ source init_env.sh
 Training is performed in two steps - unsupervised pre-training and supervised transfer learning. The unsupervised pre-training trains an encoder network (together with a trainable viewmaker network) using the sim-clr objective. The transfer learning task is to take the trained encoder and viewmaker, add a classification network on top of the frozen models, and train the classification module to perform the supervised learning task. 
 
 So far, we have provided 4 experiment scripts:
-    `sim_clr_pretrain`
-    `sim_clr_transfer` - coming soon
-    `viewmaker_pretrain` - coming soon
-    `viewmaker_transfer` - coming soon
+- `sim_clr_pretrain`
+- `sim_clr_transfer` - coming soon
+- `viewmaker_pretrain` - coming soon
+- `viewmaker_transfer` - coming soon
 
 These scripts cover pretraining and transfer learning for the original sim_clr model and for the sim_clr model with additional adversarially trainable viewmaker as presented in the original paper. 
 

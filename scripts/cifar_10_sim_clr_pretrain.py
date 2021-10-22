@@ -10,7 +10,7 @@ from src.models.SimCLR import SimCLR
 from src.utils.SimCLR_data_util import preprocess_for_train
 
 # default hyper parameters as used by authors
-PARAMS = {
+DEFAULT_PARAMS = {
     'temperature': 0.07,
     'batch_size': 256,
     'epochs': 200,
@@ -27,11 +27,9 @@ def get_args():
     parser.add_argument('--save_dir', type=str, default='.', help='where to save the model weights')
     parser.add_argument('--load_filepath', type=str, default=None)
     parser.add_argument('--epochs', type=int, default=200, help='')
+    parser.add_argument('--params', type=str, default=None, help='optional json file specifying hyperparameters')
     args = parser.parse_args()
     return args
-
-ARGS = get_args()
-
 
 def get_encoder():
     encoder_base = ResNet18(10)
@@ -57,7 +55,7 @@ def get_viewmaker():
             return tf.map_fn(augment_image, x)
     return MyViewmaker()
 
-def run_training():
+def run_training(ARGS,):
     dataset = get_unsupervised_dataset(batch_size=PARAMS['batch_size'])
     # model needs batch of EXACTLY batch_size -- leave out last batch:
     dataset = dataset.take(len(dataset)-1) 
@@ -91,5 +89,14 @@ def run_training():
     model.save_weights(filepath)
 
 if __name__ == '__main__':
+
+    ARGS = get_args()
+    if ARGS.params:
+        import json
+        with open(ARGS.params) as params_json:
+            PARAMS = json.load(params_json)
+    else:
+        PARAMS = DEFAULT_PARAMS
+
     run_training()
 

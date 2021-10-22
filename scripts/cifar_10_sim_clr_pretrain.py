@@ -26,12 +26,12 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--save_dir', type=str, default='.', help='where to save the model weights')
     parser.add_argument('--load_filepath', type=str, default=None)
-    parser.add_argument('--epochs', type=int, default=200, help='')
-    parser.add_argument('--params', type=str, default=None, help='optional json file specifying hyperparameters')
+    parser.add_argument('--params_filepath', type=str, default=None, help='json file specifying hyperparameters')
     args = parser.parse_args()
     return args
 
-def get_encoder():
+
+def get_encoder(params):
     encoder_base = ResNet18(10)
     encoder = tf.keras.Sequential(
         encoder_base.layers[:-1],
@@ -39,14 +39,16 @@ def get_encoder():
     )
     return encoder
 
-def get_projection_head():
+
+def get_projection_head(params):
     # no additional projection head
     return tf.keras.Sequential(
-        [tf.keras.layers.Dense(PARAMS['embedding_dim'], activation=None)],
+        [tf.keras.layers.Dense(params['embedding_dim'], activation=None)],
         name='projection_head'
     )
 
-def get_viewmaker():
+
+def get_viewmaker(params):
     class MyViewmaker(tf.keras.layers.Layer):
         def __init__(self):
             super().__init__(name='expert_augmentation_viewmaker')
@@ -55,11 +57,17 @@ def get_viewmaker():
             return tf.map_fn(augment_image, x)
     return MyViewmaker()
 
-def run_training(ARGS,):
-    dataset = get_unsupervised_dataset(batch_size=PARAMS['batch_size'])
+
+def get_dataset(params):
+    dataset = get_unsupervised_dataset(batch_size=params['batch_size'])
     # model needs batch of EXACTLY batch_size -- leave out last batch:
     dataset = dataset.take(len(dataset)-1) 
-    
+
+
+def run_training(params, args):
+
+    dataset = get_dataset(params, args)
+
     encoder = get_encoder()
     viewmaker = get_viewmaker()
     projection_head = get_projection_head()
@@ -67,36 +75,36 @@ def run_training(ARGS,):
     model = SimCLR(encoder, 
         viewmaker, 
         projection_head, 
-        temperature=PARAMS['temperature'],
+        temperature=params['temperature'],
         name='SimCLR_model'
     )
     model(next(iter(dataset))) #build model
     print(model.summary())
 
-    if ARGS.load_filepath: 
-        model.load_weights(ARGS.load_filepath)
+    if args.load_filepath: 
+        model.load_weights(args.load_filepath)
 
     optimizer = tfa.optimizers.SGDW(
-        learning_rate = PARAMS['learning_rate'],
-        momentum = PARAMS['momentum'],
-        weight_decay = PARAMS['weight_decay']
+        learning_rate = params['learning_rate'],
+        momentum = params['momentum'],
+        weight_decay = params['weight_decay']
     )
     model.compile(optimizer=optimizer)
 
-    model.fit(dataset, epochs=ARGS.epochs)
+    model.fit(dataset, epochs=args.epochs)
 
-    filepath = os.path.join(ARGS.save_dir, 'model_weights.h5')
+    filepath = os.path.join(args.save_dir, 'model_weights.h5')
     model.save_weights(filepath)
 
 if __name__ == '__main__':
 
-    ARGS = get_args()
-    if ARGS.params:
+    args = get_args()
+    if args.params:
         import json
-        with open(ARGS.params) as params_json:
-            PARAMS = json.load(params_json)
+        with open(args.params) as params_json:
+            params = json.load(params_json)
     else:
-        PARAMS = DEFAULT_PARAMS
+        params = DEFAULT_PARAMS
 
     run_training()
 

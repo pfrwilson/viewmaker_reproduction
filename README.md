@@ -23,6 +23,7 @@ git clone https://github.com/pfrwilson/viewmaker_reproduction
 cd viewmaker_reproduction
 conda create -n my_env
 conda activate my_env
+pip install -r requrements.txt
 source init_env.sh
 ```
 

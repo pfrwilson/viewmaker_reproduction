@@ -82,10 +82,12 @@ class ResNet(tf.keras.Model):
 
         self.conv1 = layers.Conv2D(64, (3,3), strides=1, padding='same', use_bias=False)
         self.bn1 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
+        self.relu = layers.ReLU()
         self.layer1 = self._make_layer(block, 64, num_blocks[0], strides=1)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], strides=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], strides=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], strides=2)
+        self.pool = layers.AvgPool2D(pool_size=(4, 4))
         self.flatten = layers.Flatten()
         self.fc = layers.Dense(num_classes)
 
@@ -101,12 +103,12 @@ class ResNet(tf.keras.Model):
     def call(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
-        x = layers.ReLU()(x)
+        x = self.relu(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        x = layers.AvgPool2D(pool_size=(4, 4))(x)
+        x = self.pool(x)
         x = self.flatten(x)
         logits = self.fc(x)
         return logits

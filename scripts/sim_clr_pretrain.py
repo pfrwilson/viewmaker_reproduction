@@ -30,7 +30,6 @@ def get_args():
     args = parser.parse_args()
     return args
 
-
 def get_encoder(params):
     encoder_base = ResNet18(10)
     encoder = tf.keras.Sequential(
@@ -39,14 +38,12 @@ def get_encoder(params):
     )
     return encoder
 
-
 def get_projection_head(params):
     # no additional projection head
     return tf.keras.Sequential(
         [tf.keras.layers.Dense(params['embedding_dim'], activation=None)],
         name='projection_head'
     )
-
 
 def get_viewmaker(params):
     class MyViewmaker(tf.keras.layers.Layer):
@@ -57,13 +54,7 @@ def get_viewmaker(params):
             return tf.map_fn(augment_image, x)
     return MyViewmaker()
 
-def get_dataset(params):
-    dataset = get_unsupervised_dataset(batch_size=params['batch_size'])
-    return dataset
-
-def run_training(params, args):
-
-    dataset = get_dataset(params)
+def get_model(params):
     encoder = get_encoder(params)
     viewmaker = get_viewmaker(params)
     projection_head = get_projection_head(params)
@@ -74,6 +65,17 @@ def run_training(params, args):
         temperature=params['temperature'],
         name='SimCLR_model'
     )
+    return model 
+
+def get_dataset(params):
+    dataset = get_unsupervised_dataset(batch_size=params['batch_size'])
+    return dataset
+
+def run_training(params, args):
+
+    dataset = get_dataset(params)
+    model = get_model(params)
+
     model(next(iter(dataset))) #build model by calling on batch - necessary for loading weights
     print(model.summary())
 

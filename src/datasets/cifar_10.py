@@ -31,6 +31,3 @@ def get_supervised_dataset():
 
     return (x_train, y_train), (x_test, y_test)
 
-def get_augmented_dataset():
-    pass 
-    #TODO

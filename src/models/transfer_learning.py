@@ -4,8 +4,11 @@ def get_transfer_classifier(viewmaker, encoder, num_classes):
     return TransferModel(
         viewmaker, 
         encoder, 
-        tf.keras.Dense(num_classes),
-        )
+        tf.keras.Sequential([
+            tf.keras.layers.Flatten(),
+            tf.keras.laters.Dense(num_classes),
+        ])
+    )
 
 class TransferModel(tf.keras.Model):
     def __init__(

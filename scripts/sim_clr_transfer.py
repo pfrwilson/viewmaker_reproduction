@@ -34,6 +34,7 @@ def get_pretrained_model(embedding_dim,  load_filepath:str, temperature=1.0, inp
     
     model = get_model(embedding_dim, temperature, input_shape)
     model.load_weights(load_filepath)
+    return model
 
 def get_dataset():
     return get_supervised_dataset()
@@ -60,10 +61,17 @@ def run_training(params, args):
 
     model.compile(
         optimizer=optimizer, 
-        loss = tf.keras.losses.CategoricalCrossEntropy(from_logits=True)
+        loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True),
+        metrics = ['accuracy']
     )
 
-    model.fit(x_train, y_train, val=(x_test, y_test), epochs=params['epochs'])
+    model.fit(
+        x_train, 
+        y_train, 
+        validation_data=(x_test, y_test), 
+        batch_size=params['batch_size'], 
+        epochs=params['epochs']
+    )
 
     model.save_weights(args.save_filepath)
 

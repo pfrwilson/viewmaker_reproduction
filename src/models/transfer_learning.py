@@ -2,12 +2,12 @@ import tensorflow as tf
 
 def get_transfer_classifier(viewmaker, encoder, num_classes):
     return TransferModel(
-        viewmaker, 
         encoder, 
         tf.keras.Sequential([
             tf.keras.layers.Flatten(),
-            tf.keras.laters.Dense(num_classes),
-        ])
+            tf.keras.layers.Dense(num_classes),
+        ]),
+        viewmaker=viewmaker
     )
 
 class TransferModel(tf.keras.Model):
@@ -31,4 +31,4 @@ class TransferModel(tf.keras.Model):
             x = self.viewmaker(x)
         x = self.encoder(x)
         logits = self.classifier(x)
-        return logits
+        return logits 

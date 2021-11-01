@@ -44,11 +44,11 @@ The scripts come equipped with default settings to train on the cifar_10 dataset
 
 Example training with defaults:
 ```
-python scripts/sim_clr_pretrain.py --save_dir 'test_save' 
+python scripts/sim_clr_pretrain.py --save_dir 'model_weights.h5' 
 ```
 Example training with custom params:
 ``` 
-python scripts/sim_clr_pretrain.py --save_dir 'test_save' --params_filepath 'sample_params.txt'
+python scripts/sim_clr_pretrain.py --save_filepath 'model_weights.h5' --params_filepath 'sample_params.txt'
 ```
 
 ## Evaluation

@@ -82,11 +82,12 @@ def run_training(params, args):
     if args.load_filepath: 
         model.load_weights(args.load_filepath)
 
-    optimizer = tfa.optimizers.SGDW(
-        learning_rate = params['learning_rate'],
-        momentum = params['momentum'],
-        weight_decay = params['weight_decay']
-    )
+    # optimizer = tfa.optimizers.SGDW(
+    #     learning_rate = params['learning_rate'],
+    #     momentum = params['momentum'],
+    #     weight_decay = params['weight_decay']
+    # )
+    optimizer = tf.keras.optimizers.Adam()
     model.compile(optimizer=optimizer)
 
     model.fit(dataset, epochs=params['epochs'])

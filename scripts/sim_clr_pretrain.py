@@ -24,13 +24,13 @@ DEFAULT_PARAMS = {
 def get_args():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--save_dir', type=str, default='.', help='where to save the model weights')
+    parser.add_argument('--save_filepath', type=str, help='where to save the model weights')
     parser.add_argument('--load_filepath', type=str, default=None)
     parser.add_argument('--params_filepath', type=str, default=None, help='json file specifying hyperparameters')
     args = parser.parse_args()
     return args
 
-def get_encoder(params):
+def get_encoder():
     encoder_base = ResNet18(10)
     encoder = tf.keras.Sequential(
         encoder_base.layers[:-1],
@@ -38,14 +38,14 @@ def get_encoder(params):
     )
     return encoder
 
-def get_projection_head(params):
+def get_projection_head(embedding_dim):
     # no additional projection head
     return tf.keras.Sequential(
-        [tf.keras.layers.Dense(params['embedding_dim'], activation=None)],
+        [tf.keras.layers.Dense(embedding_dim, activation=None)],
         name='projection_head'
     )
 
-def get_viewmaker(params):
+def get_viewmaker():
     class MyViewmaker(tf.keras.layers.Layer):
         def __init__(self):
             super().__init__(name='expert_augmentation_viewmaker')
@@ -54,29 +54,31 @@ def get_viewmaker(params):
             return tf.map_fn(augment_image, x)
     return MyViewmaker()
 
-def get_model(params):
-    encoder = get_encoder(params)
-    viewmaker = get_viewmaker(params)
-    projection_head = get_projection_head(params)
+def get_model(embedding_dim, temperature=1.0, input_shape=(None, 32, 32, 3)):
+    encoder = get_encoder()
+    viewmaker = get_viewmaker()
+    projection_head = get_projection_head(embedding_dim)
     
     model = SimCLR(encoder, 
         viewmaker, 
         projection_head, 
-        temperature=params['temperature'],
+        temperature=temperature,
         name='SimCLR_model'
     )
-    return model 
 
-def get_dataset(params):
-    dataset = get_unsupervised_dataset(batch_size=params['batch_size'])
+    model.build(input_shape)
+
+    return model
+
+def get_dataset(batch_size):
+    dataset = get_unsupervised_dataset(batch_size=batch_size)
     return dataset
 
 def run_training(params, args):
 
-    dataset = get_dataset(params)
-    model = get_model(params)
+    dataset = get_dataset(params['batch_size'])
+    model = get_model(params['embedding_dim'], temperature=params['temperature'])
 
-    model(next(iter(dataset))) #build model by calling on batch - necessary for loading weights
     print(model.summary())
 
     if args.load_filepath: 
@@ -92,8 +94,7 @@ def run_training(params, args):
 
     model.fit(dataset, epochs=params['epochs'])
 
-    filepath = os.path.join(args.save_dir, 'model_weights.h5')
-    model.save_weights(filepath)
+    model.save_weights(args.save_filepath)
 
 if __name__ == '__main__':
 

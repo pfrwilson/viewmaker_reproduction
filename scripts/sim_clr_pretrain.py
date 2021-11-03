@@ -6,7 +6,8 @@ import os
 
 from src.datasets.cifar_10 import get_unsupervised_dataset
 from src.models.resnet_small import ResNet18
-from src.models.SimCLR import SimCLR
+#from src.models.SimCLR import SimCLR
+from src.models.Version2_SimCLR import SimCLR
 from src.utils.SimCLR_data_util import preprocess_for_train
 
 # default hyper parameters as used by authors

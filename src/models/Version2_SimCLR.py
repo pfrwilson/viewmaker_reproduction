@@ -118,7 +118,10 @@ class SimCLRObjective(tf.keras.layers.Layer):
         witness_score = tf.reduce_sum(tf.math.multiply(embeddings_1, embeddings_2), axis=1)/self.temperature
 
         witness_norm = tf.matmul(embeddings_1, x, transpose_b=True)/self.temperature
-        witness_norm = tf.math.reduce_logsumexp(witness_norm, axis=1) - math.log(2*batch_size)
+        witness_norm = tf.math.reduce_logsumexp(witness_norm, axis=1) 
+        # 2 * batch_size as compatible tensor
+        NUMBER_OF_EXAMPLES = tf.cast(tf.constant(2)*batch_size, 'float32')
+        witness_norm = witness_norm - tf.math.log(NUMBER_OF_EXAMPLES)
 
         loss = -tf.reduce_mean(witness_score - witness_norm)
 

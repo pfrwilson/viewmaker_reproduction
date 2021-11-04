@@ -25,10 +25,12 @@ class TransferModel(tf.keras.Model):
         if freeze_encoder_weights:
             self.encoder.trainable=False
         self.classifier = classifier
+        self.softmax = tf.keras.layers.Softmax()
     
     def call(self, x, training=False):
         if training and self.viewmaker:
             x = self.viewmaker(x)
         x = self.encoder(x)
         logits = self.classifier(x)
-        return logits 
+        predictions = self.softmax(logits)
+        return predictions

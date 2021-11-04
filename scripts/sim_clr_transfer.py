@@ -13,11 +13,11 @@ DEFAULT_PARAMS = {
     'temperature': 0.07,
     'embedding_dim': 128,
     # training
-    'batch_size': 256,
-    'epochs': 200,
-    'learning_rate': 0.03,
+    'batch_size': 128,
+    'epochs': 100,
+    'learning_rate': 0.01,
     'momentum': 0.9,
-    'weight_decay': 1e-4,    
+    'weight_decay': 0,    
 }
 
 # command line args
@@ -50,6 +50,10 @@ def run_training(params, args):
     )
 
     encoder = pretrained_model.encoder
+    encoder = tf.keras.Sequential(
+        encoder.layers[:-3]
+    )
+    #print(encoder.summary())
     viewmaker = pretrained_model.viewmaker
     model = get_transfer_classifier(viewmaker, encoder, 10)
 
@@ -58,10 +62,11 @@ def run_training(params, args):
          momentum = params['momentum'],
          weight_decay = params['weight_decay']
     )
+    # optimizer = tfa.optimizers.AdamW(params['weight_decay'])
 
     model.compile(
         optimizer=optimizer, 
-        loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True),
+        loss = tf.keras.losses.CategoricalCrossentropy(from_logits=False),
         metrics = ['accuracy']
     )
 

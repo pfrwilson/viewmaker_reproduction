@@ -1,0 +1,2 @@
+We ran the simclr pretraining using the authors' parameters, and found that loss started at 48% and did not change at all during training. 
+So, we changed our loss function to the authors' loss, and it decreased steadily (started at -3 and went down to -5.2), and then we used this to train. starting accuracy: 56.67%. 

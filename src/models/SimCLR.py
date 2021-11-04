@@ -156,7 +156,7 @@ class SimCLR_logits_from_embeddings(tf.keras.layers.Layer):
 
         masks = tf.one_hot(tf.range(batch_size), batch_size)
 
-        LARGE_NUM = 1e10
+        LARGE_NUM = 1e5
         logits_11 = tf.matmul(embeddings_1, embeddings_1, transpose_b=True)/self.temperature
         logits_11 = tf.subtract(logits_11, LARGE_NUM*masks)
         logits_22 = tf.matmul(embeddings_2, embeddings_2, transpose_b=True)/self.temperature

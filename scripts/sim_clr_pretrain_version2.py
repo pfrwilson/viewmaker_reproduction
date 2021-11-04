@@ -6,21 +6,32 @@ import os
 
 from src.datasets.cifar_10 import get_unsupervised_dataset
 from src.models.resnet_small_version2 import ResNet18
-#from src.models.SimCLR import SimCLR
-from src.models.Version2_SimCLR import SimCLR
+from src.models.SimCLR import SimCLR
+#from src.models.Version2_SimCLR import SimCLR
 from src.utils.SimCLR_data_util import preprocess_for_train
 from src.models.layers import Identity
 
 # default hyper parameters as used by authors
+#DEFAULT_PARAMS = {
+#    'temperature': 0.07,
+#    'batch_size': 256,
+#    'epochs': 200,
+#    'learning_rate': 0.03,
+#    'momentum': 0.9,
+#    'weight_decay': 1e-4, 
+#    'embedding_dim': 128
+#}
+# hyper parameters used by wangxin0716/SimCLR-CIFAR10 
 DEFAULT_PARAMS = {
-    'temperature': 0.07,
+    'temperature': 0.5,
     'batch_size': 256,
-    'epochs': 200,
-    'learning_rate': 0.03,
-    'momentum': 0.9,
-    'weight_decay': 1e-4, 
+    'epochs': 1000,
+    'initial_learning_rate': 0.6, 
+    'momentum': 0.9, 
+    'weight_decay': 1e-6,
     'embedding_dim': 128
 }
+
 
 # command line args
 def get_args():
@@ -39,8 +50,10 @@ def get_encoder():
 
 def get_projection_head(embedding_dim):
     # no additional projection head
-    return tf.keras.Sequential(
-        [tf.keras.layers.Dense(embedding_dim, activation=None)],
+    return tf.keras.Sequential([
+        tf.keras.layers.Dense(2048, activation='relu'),
+        tf.keras.layers.Dense(embedding_dim, activation=None)
+        ],
         name='projection_head'
     )
 
@@ -83,8 +96,14 @@ def run_training(params, args):
     if args.load_filepath: 
         model.load_weights(args.load_filepath)
 
+    lr_schedule = tf.keras.optimizers.schedules.CosineDecay(
+        initial_learning_rate = params['learning_rate'], 
+        decay_steps = params['epochs']*len(dataset),
+        alpha = 1e-3
+    )
+
     optimizer = tfa.optimizers.SGDW(
-        learning_rate = params['learning_rate'],
+        learning_rate = lr_schedule,
         momentum = params['momentum'],
         weight_decay = params['weight_decay']
     )

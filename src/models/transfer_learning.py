@@ -1,13 +1,14 @@
 import tensorflow as tf
 
-def get_transfer_classifier(viewmaker, encoder, num_classes):
+def get_transfer_classifier(viewmaker, encoder, num_classes, freeze_encoder_weights=True):
     return TransferModel(
         encoder, 
         tf.keras.Sequential([
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(num_classes),
         ]),
-        viewmaker=viewmaker
+        viewmaker=viewmaker,
+        freeze_encoder_weights=freeze_encoder_weights
     )
 
 class TransferModel(tf.keras.Model):

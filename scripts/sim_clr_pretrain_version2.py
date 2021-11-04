@@ -88,7 +88,7 @@ def run_training(params, args):
         momentum = params['momentum'],
         weight_decay = params['weight_decay']
     )
-    optimizer = tf.keras.optimizers.Adam()
+    #optimizer = tf.keras.optimizers.Adam()
     model.compile(optimizer=optimizer)
 
     model.fit(dataset, epochs=params['epochs'])

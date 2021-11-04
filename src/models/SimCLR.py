@@ -20,7 +20,7 @@ class SimCLR(tf.keras.Model):
             normalize=normalize
         )
     
-    def compile(self, optimizer, loss_fn=tf.nn.softmax_cross_entropy_with_logits):
+    def compile(self, optimizer, loss_fn=tf.keras.losses.CategoricalCrossentropy()):
         super(SimCLR, self).compile()
         self.optimizer = optimizer
         
@@ -168,5 +168,6 @@ class SimCLR_logits_from_embeddings(tf.keras.layers.Layer):
         logits_2 = tf.concat([logits_22, logits_21], axis=1)
 
         logits = tf.concat([logits_1, logits_2], axis=0)
+        predictions = tf.keras.layers.SoftMax(logits)
 
-        return logits
+        return predictions

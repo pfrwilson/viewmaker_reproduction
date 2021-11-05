@@ -70,7 +70,7 @@ class SimCLR(tf.keras.Model):
 
     @staticmethod
     def _compute_accuracy(labels, predictions):
-        predictions = tf.argmax(logits, axis=1)
+        predictions = tf.argmax(predictions, axis=1)
         labels = tf.argmax(labels, axis=1)
         n_labels = tf.shape(labels)[0]
         accuracy = tf.reduce_sum(tf.cast(tf.equal(predictions, labels), 'int32'))/(n_labels)

@@ -68,7 +68,7 @@ def train(args: DictConfig) -> None:
     
     model.compile(optimizer=optimizer)
 
-    model.fit(epochs=args.epochs)
+    model.fit(dataset, epochs=args.epochs)
 
     model.save(args.save_filepath)
 

@@ -73,6 +73,7 @@ def train(args: DictConfig) -> None:
     model.save(args.save_filepath)
 
 
-
+if __name__ == '__main__':
+    train()
 
 

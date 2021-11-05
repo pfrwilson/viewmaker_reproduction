@@ -14,5 +14,5 @@ epochs: 200
 batch_size: 256
 
 # save/load -- relative to path of script file
-load_filepath: None    
+load_filepath: null    
 save_filepath: '../expts/sample_expt/simclr_pretrained_weights.h5'

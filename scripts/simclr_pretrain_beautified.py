@@ -10,7 +10,7 @@ from src.models.layers import Identity
 from src.datasets import cifar_10
 from src.models.SimCLR import SimCLR
 
-CONFIG_PATH:str = '../config'
+CONFIG_PATH:str = '../configs'
 CONFIG_NAME:str = 'sample_config'
 
 def build_model(input_shape, temperature, embedding_dim, load_filepath=None):

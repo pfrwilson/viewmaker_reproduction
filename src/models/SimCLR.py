@@ -168,6 +168,6 @@ class SimCLR_logits_from_embeddings(tf.keras.layers.Layer):
         logits_2 = tf.concat([logits_22, logits_21], axis=1)
 
         logits = tf.concat([logits_1, logits_2], axis=0)
-        predictions = tf.keras.layers.SoftMax(logits)
+        predictions = tf.keras.layers.Softmax()(logits)
 
         return predictions

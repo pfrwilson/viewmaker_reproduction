@@ -27,8 +27,8 @@ class SimCLR(tf.keras.Model):
 
     def call(self, x):
         # generates views of the data
-        data_view1 = self.preprocessing_layer(x)
-        data_view2 = self.preprocessing_layer(x)
+        data_view1 = self.preprocessing_layer(x, train=True)
+        data_view2 = self.preprocessing_layer(x, train=True)
         batch_size = tf.shape(x)[0]
 
         # concatenate views for input to encoder

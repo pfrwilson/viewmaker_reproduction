@@ -70,7 +70,7 @@ def train(args: DictConfig) -> None:
 
     model.fit(dataset, epochs=args.epochs)
 
-    model.save(args.save_filepath)
+    model.save_weights(args.save_filepath)
 
 
 if __name__ == '__main__':

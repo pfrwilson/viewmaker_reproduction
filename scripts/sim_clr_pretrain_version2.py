@@ -24,9 +24,9 @@ from src.models.layers import Identity
 # hyper parameters used by wangxin0716/SimCLR-CIFAR10 
 DEFAULT_PARAMS = {
     'temperature': 0.5,
-    'batch_size': 256,
+    'batch_size': 512,
     'epochs': 1000,
-    'initial_learning_rate': 0.6, 
+    'learning_rate': 0.6, 
     'momentum': 0.9, 
     'weight_decay': 1e-6,
     'embedding_dim': 128

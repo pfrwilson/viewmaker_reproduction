@@ -6,7 +6,7 @@ import tensorflow_addons as tfa
 
 from src.models.layers import Identity
 from src.models.transfer_learning import TransferModel
-from scripts.viewmaker_pretrain_beautified import build_model as build_pretrained_viewmaker
+from scripts.viewmaker_pretrain import build_model as build_pretrained_viewmaker
 from src.datasets.cifar_10 import get_supervised_dataset, get_unsupervised_dataset
 
 CONFIG_PATH:str = '../configs'

@@ -11,7 +11,7 @@ from src.datasets import cifar_10
 from src.models.SimCLR import SimCLR
 
 CONFIG_PATH:str = '../configs'
-CONFIG_NAME:str = 'sample_config'
+CONFIG_NAME:str = 'simclr_pretrain_config'
 
 def build_model(input_shape, temperature, embedding_dim, load_filepath=None):
 
@@ -68,7 +68,9 @@ def train(args: DictConfig) -> None:
     
     model.compile(optimizer=optimizer)
 
-    model.fit(dataset, epochs=args.epochs)
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=args.log_directory)
+
+    model.fit(dataset, epochs=args.epochs, callbacks=[tensorboard_callback])
 
     model.save_weights(args.save_filepath)
 

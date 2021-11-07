@@ -13,14 +13,15 @@ class TransferModel(tf.keras.Model):
         super().__init__(**kwargs)
         self.preprocessing = preprocessing
         self.viewmaker = viewmaker
-        self.viewmaker.trainable=False
+        if self.viewmaker:
+            self.viewmaker.trainable=False
         self.encoder = encoder
         if freeze_encoder_weights:
             self.encoder.trainable=False
         self.classifier = classifier               
     
     def call(self, x, training=False):
-        x = self.preprocessing(x, training=True) if training else self.preprocessing(x)
+        x = self.preprocessing(x, training=training)
         if training and self.viewmaker:
             x = self.viewmaker(x)
         x = self.encoder(x)

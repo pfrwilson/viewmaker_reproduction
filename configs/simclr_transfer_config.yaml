@@ -1,0 +1,27 @@
+
+# model 
+embedding_dim: 128
+temperature: 0.07
+
+# optimizer
+optimizer_name: 'sgd'
+learning_rate: 0.01
+weight_decay: 0.0
+momentum: 0.9
+
+# training
+train: true                                 # false if just running the script for evaluation
+epochs: 100
+batch_size: 256
+
+# evaluation
+eval_batch_size: 256
+
+# save/load
+log_directory: ../expts/sample_expt/log
+load:
+  pretrained_simclr_weights: ../expts/sample_expt/pretrained_simclr_weights.h5
+  pretrained_classifier_weights: none        # if using for evaluation not training
+save:
+  classifier_weights: ../expts/sample_expt/trained_classifier_weights.h5
+

@@ -1,0 +1,20 @@
+
+# model 
+embedding_dim: 128
+temperature: 0.07
+viewmaker_loss_weight: 1.0 #only needed if using viewmaker
+
+# optimizer
+optimizer_name: 'sgd'
+learning_rate: 0.03
+weight_decay: 1.0e-5
+momentum: 0.9
+
+# training
+epochs: 200
+batch_size: 256
+
+# save/load -- relative to path of script file
+expt_directory: ../expts/sample_expt
+load_filepath: null    
+save_filepath: '../expts/sample_expt/simclr_pretrained_weights.h5'

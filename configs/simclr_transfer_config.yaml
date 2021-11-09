@@ -18,10 +18,10 @@ batch_size: 256
 eval_batch_size: 256
 
 # save/load
-log_directory: ../expts/sample_expt/log
+log_dir: ../expts/sample_expt/log
 load:
-  pretrained_simclr_weights: ../expts/sample_expt/pretrained_simclr_weights.h5
-  pretrained_classifier_weights: none        # if using for evaluation not training
+  pretrained_simclr_weights: /home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment1/cifar10_pretrain_simclr.h5
+  pretrained_classifier_weights:        # if using for evaluation not training
 save:
-  classifier_weights: ../expts/sample_expt/trained_classifier_weights.h5
+  classifier_weights: /home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment1/cifar10_transfer_simclr.h5
 

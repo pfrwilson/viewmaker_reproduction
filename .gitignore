@@ -4,3 +4,5 @@ __pycache__
 cifar_10_experiment/
 .idea
 outputs/
+*.h5
+sample_params.txt

@@ -6,11 +6,11 @@ import tensorflow_addons as tfa
 
 from src.models.layers import Identity
 from src.models.transfer_learning import TransferModel
-from scripts.simclr_pretrain_beautified import build_model as build_pretrained_simclr
+from scripts.simclr_pretrain import build_model as build_pretrained_simclr
 from src.datasets.cifar_10 import get_supervised_dataset, get_unsupervised_dataset
 
 CONFIG_PATH:str = '../configs'
-CONFIG_NAME:str = 'finetune_config'
+CONFIG_NAME:str = 'simclr_transfer_config'
 
 def build_model(input_shape, temperature, embedding_dim, load_filepath, load_simclr_filepath, num_classes):
     
@@ -25,7 +25,7 @@ def build_model(input_shape, temperature, embedding_dim, load_filepath, load_sim
     encoder.pool = Identity()               # encoder output is pre-pool 4x4x512 feature map
     preprocessing = pretrained_model.preprocessing_layer
     classifier = tf.keras.Sequential([
-        tf.keras.layers.Flatten, 
+        tf.keras.layers.Flatten(), 
         tf.keras.layers.Dense(num_classes),
         tf.keras.layers.Softmax()
     ])

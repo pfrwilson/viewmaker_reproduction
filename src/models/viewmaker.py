@@ -1,6 +1,6 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
-import tensorflow_lattice as tfl
+#import tensorflow_lattice as tfl
 import numpy as np
 
 ACTIVATIONS = {
@@ -60,14 +60,14 @@ class Viewmaker(tf.keras.Model):
         self.in5 = tfa.layers.InstanceNormalization()
         self.deconv3 = self.deconv3 = ConvLayer(32, self.num_channels, kernel_size=9, stride=1)
 
-    @staticmethod
-    def zero_init(m):
-        if isinstance(m, (tfl.layers.Linear, tf.keras.layers.Conv2D)):
-            # actual 0 has symmetry problems
-            m.weights = tf.random.normal(m.weights, mean=0, stddev=1e-4)
-            m.bias = tf.convert_to_tensor(np.zeros(shape(m.bias)))
-        # elif isinstance(m, tf.keras.layers.BatchNormalization):
-        #     pass
+    #@staticmethod
+    #def zero_init(m):
+    #    if isinstance(m, (tfl.layers.Linear, tf.keras.layers.Conv2D)):
+    #        # actual 0 has symmetry problems
+    #        m.weights = tf.random.normal(m.weights, mean=0, stddev=1e-4)
+    #        m.bias = tf.convert_to_tensor(np.zeros(shape(m.bias)))
+    #    # elif isinstance(m, tf.keras.layers.BatchNormalization):
+    #    #     pass
             
     def add_noise_channel(self, x, num=1, bound_multiplier=1):
         # bound_multiplier is a scalar or a 1D tensor of length batch_size
@@ -185,7 +185,7 @@ class UpsampleConvLayer(tf.keras.layers.Layer):
         self.conv2d = tf.keras.layers.Conv2D(out_channels, 
                                             kernel_size, 
                                             stride,
-                                            data_format='channels_first')
+                                        )
 
     def call(self, x):
         x_in = x

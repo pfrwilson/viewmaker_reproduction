@@ -8,7 +8,7 @@ from src.models.resnet_small_version2 import ResNet18
 from src.models.layers import Identity
 from src.datasets import cifar_10
 from src.models.SimCLR import SimCLR_adversarial
-from src.models.viewmaker import Viewmaker
+from src.models.viewmaker_new import Viewmaker
 
 CONFIG_PATH:str = '../configs'
 CONFIG_NAME:str = 'viewmaker_pretrain_config.yaml'

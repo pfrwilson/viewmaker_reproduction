@@ -49,7 +49,7 @@ class UpsampleConvLayer(tf.keras.layers.Layer):
     ref: http://distill.pub/2016/deconv-checkerboard/
     """
 
-    def __init__(self, out_channels, kernel_size, stride, upsample=None):
+    def __init__(self, out_channels, kernel_size, strides, upsample=None):
         super(UpsampleConvLayer, self).__init__()
         
         self.upsample = Identity()
@@ -61,7 +61,7 @@ class UpsampleConvLayer(tf.keras.layers.Layer):
         self.conv2d = tf.keras.layers.Conv2D(
             out_channels, 
             kernel_size, 
-            strides=stride, 
+            strides=strides, 
             padding='same'
         )
 
@@ -115,7 +115,7 @@ class Viewmaker(tf.keras.Model):
             num_res_blocks: Number of residual blocks to use in the network.
                 ---> reproduction - we only used 3 blocks
         '''
-
+        super().__init__()
         self.num_channels = num_channels
         self.clamp = clamp
         self.frequency_domain = frequency_domain
@@ -125,11 +125,11 @@ class Viewmaker(tf.keras.Model):
         self.add_noise = RandomNoise()
 
         # Initial convolution layers (+ 1 for noise filter)
-        self.conv1 = tf.keras.layers.Conv2D(32, kernel_size=9, stride=1, padding='same')
+        self.conv1 = tf.keras.layers.Conv2D(32, kernel_size=9, strides=1, padding='same')
         self.in1 = tfa.layers.InstanceNormalization() # may need to add input_spec
-        self.conv2 = tf.keras.layers.Conv2D(64, kernel_size=3, stride=2, padding='same')
+        self.conv2 = tf.keras.layers.Conv2D(64, kernel_size=3, strides=2, padding='same')
         self.in2 = tfa.layers.InstanceNormalization() # may need to add input_spec
-        self.conv3 = tf.keras.layers.Conv2D(128, kernel_size=3, stride=2, padding='same')
+        self.conv3 = tf.keras.layers.Conv2D(128, kernel_size=3, strides=2, padding='same')
         self.in3 = tfa.layers.InstanceNormalization() # may need to add input_spec
         
         # Residual layers have +N for added random channels
@@ -138,11 +138,11 @@ class Viewmaker(tf.keras.Model):
         self.res3 = ResidualBlock(128 + 3)
 
         # Upsampling layers
-        self.deconv1 = UpsampleConvLayer(64, kernel_size=3, stride=1, upsample=2)
+        self.deconv1 = UpsampleConvLayer(64, kernel_size=3, strides=1, upsample=2)
         self.in4 = tfa.layers.InstanceNormalization()
-        self.deconv2 = UpsampleConvLayer(32, kernel_size=3, stride=1, upsample=2)
+        self.deconv2 = UpsampleConvLayer(32, kernel_size=3, strides=1, upsample=2)
         self.in5 = tfa.layers.InstanceNormalization()
-        self.deconv3 = self.deconv3 = tf.keras.layers.Conv2D(self.num_channels, kernel_size=9, stride=1)   
+        self.deconv3 = tf.keras.layers.Conv2D(self.num_channels, kernel_size=9, strides=1, padding='same')   
 
         # Project to sphere layer
         self.project = ProjectToL1Sphere(self.distortion_budget)

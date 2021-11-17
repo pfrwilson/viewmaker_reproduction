@@ -1,6 +1,6 @@
 # model 
 embedding_dim: 128
-temperature: 0.07
+temperature: 0.50
 viewmaker_loss_weight: 1.0 
 disortion_budget: 0.05
 
@@ -17,4 +17,4 @@ batch_size: 256
 # save/load 
 log_directory: ../expts/sample_expt/log   # for tensorboard
 load_filepath: null    
-save_filepath: '../expts/sample_expt/simclr_pretrained_weights.h5'
+save_filepath: '/home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment3'

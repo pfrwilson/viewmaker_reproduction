@@ -17,4 +17,4 @@ batch_size: 256
 # save/load 
 log_directory: ../expts/sample_expt/log   # for tensorboard
 load_filepath: null    
-save_filepath: '/home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment3'
+save_filepath: '/home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment3/viewmaker_pretrained_weights.h5'

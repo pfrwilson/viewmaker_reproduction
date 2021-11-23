@@ -22,8 +22,8 @@ eval_batch_size: 256
 # save/load
 log_directory: ../expts/sample_expt/log
 load:
-  pretrained_simclr_weights: ../expts/sample_expt/pretrained_viewmaker_weights.h5
-  pretrained_classifier_weights: none        # if using for evaluation not training
+  pretrained_viewmaker_weights: /home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment3/viewmaker_pretrained_weights.h5
+  pretrained_classifier_weights: null        # if using for evaluation not training
 save:
-  classifier_weights: ../expts/sample_expt/trained_viewmaker_classifier_weights.h5
+  classifier_weights: /home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment3/viewmaker_transfer_weights.h5
 

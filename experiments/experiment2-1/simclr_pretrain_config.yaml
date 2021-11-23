@@ -1,0 +1,19 @@
+
+# model 
+embedding_dim: 128
+temperature: 0.5
+
+# optimizer
+optimizer_name: 'sgd'
+learning_rate: 0.03
+weight_decay: 1.0e-5
+momentum: 0.9
+
+# training
+epochs: 400
+batch_size: 512
+
+# save/load -- relative to path of script file
+log_directory: /home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment2-1/log
+load_filepath: null    
+save_filepath: /home/ayesha/Desktop/CISC867/viewmaker_reproduction/experiments/experiment2-1/simclr_pretrained_weights.h5

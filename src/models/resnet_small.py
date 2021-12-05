@@ -1,134 +1,302 @@
+''''
+  Author       : Bao Jiarong
+  Creation Date: 2020-07-07
+  email        : bao.salirong@gmail.com
+  Task         : ResNet
+ '''
+
 import tensorflow as tf
-import tensorflow.keras.layers as layers
+import sys
 
+class Block(tf.keras.layers.Layer):
+    def __init__(self, filters, strides = 1, is_begaining = False):
+        super(Block, self).__init__()
+        self.is_begaining = is_begaining
+        self.convs = []
+        self.convs.append(tf.keras.layers.Conv2D(filters = filters, kernel_size = (3,3),
+                                                 strides = strides, activation  = "relu",
+                                                 padding = "same"))
 
-class BasicBlock(layers.Layer):
-    expansion = 1
-    
-    def __init__(self, in_planes, planes, strides=1):
+        self.convs.append(tf.keras.layers.Conv2D(filters = filters, kernel_size = (3,3),
+                                                 strides = (1,1), activation  = "linear",
+                                                 padding = "same"))
 
-        super(BasicBlock, self).__init__()
+        self.conv2 = tf.keras.layers.Conv2D(filters = filters, kernel_size = (1,1),strides = strides, activation = "linear",padding = "same")
 
-        self.conv1 = layers.Conv2D(planes, (3,3), strides=strides, padding='same', use_bias=False)
-        self.bn1 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-        self.conv2 = layers.Conv2D(planes, (3,3), strides=1, padding='same', use_bias=False)
-        self.bn2 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-
-        #shortcut connection (either identity or convolution to match output shape)
-        self.shortcut = tf.keras.Sequential()
-        if in_planes != planes or strides != 1:
-            self.shortcut.add(
-                layers.Conv2D(planes, (1, 1), strides=strides, use_bias=False)
-            )
-            self.shortcut.add(
-                layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-            )
-
-    def call(self, x):
-        residual = self.shortcut(x)
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = layers.ReLU()(x)
-        x = self.conv2(x)
-        x = self.bn2(x)
-        x = layers.Add()([x, residual])
-        x = layers.ReLU()(x)
+    def call(self, inputs, **kwargs):
+        x = inputs
+        for conv in self.convs:
+            x = conv(x)
+        if self.is_begaining == True:
+            inputs = self.conv2(inputs)
+        x = x + inputs
+        x = tf.keras.activations.relu(x)
         return x
 
+class bottleneck(tf.keras.layers.Layer):
+    def __init__(self, filters, strides = 1, is_begaining = False):
+        super(bottleneck, self).__init__()
+        self.is_begaining = is_begaining
+        self.convs = []
+        f = filters * 4
+        self.convs.append(tf.keras.layers.Conv2D(filters = filters, kernel_size = (1,1),
+                                                 strides = strides, activation  = "relu",
+                                                 padding = "same"))
 
-class Bottleneck(layers.Layer):
-    expansion = 4
+        self.convs.append(tf.keras.layers.Conv2D(filters = filters, kernel_size = (3,3),
+                                                 strides = (1,1), activation  = "relu",
+                                                 padding = "same"))
 
-    def __init__(self, in_planes, planes, strides=1):
-        super(Bottleneck, self).__init__() 
-        self.conv1 = layers.Conv2D(planes, (1, 1), padding='same', use_bias=False)
-        self.bn1 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-        self.conv2 = layers.Conv2D(planes, (3, 3), strides=strides, padding='same', use_bias=False)
-        self.bn2 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-        self.conv3 = layers.Conv2D(planes*self.expansion, (1, 1), padding='same', use_bias=False)
-        self.bn3 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
+        self.convs.append(tf.keras.layers.Conv2D(filters = f, kernel_size = (1,1),
+                                                 strides = (1,1), activation  = "linear",
+                                                 padding = "same"))
 
-        self.shortcut = tf.keras.Sequential()
-        if in_planes != planes*self.expansion or strides != 1:
-            self.shortcut.add(
-                layers.Conv2D(planes*self.expansion, (1, 1), strides=strides, use_bias=False)
-            )
-            self.shortcut.add(
-                layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-            )
+        self.conv2 = tf.keras.layers.Conv2D(filters = f, kernel_size = (1,1),strides = strides, activation = "linear",padding = "same")
 
-    def call(self, x):
-        residual = self.shortcut(x)
+    def call(self, inputs, **kwargs):
+        x = inputs
+        for conv in self.convs:
+            x = conv(x)
+        if self.is_begaining == True:
+            inputs = self.conv2(inputs)
+        x = x + inputs
+        x = tf.keras.activations.relu(x)
+        return x
+
+#-------------------------------------------------------------------------------
+class Resnet_1(tf.keras.Model):
+    def __init__(self, classes, model_name = "resnet18",filters = 64):
+        super(Resnet_1,self).__init__()
+        self.model_name = model_name
+
+        #
+        #self.conv1 = tf.keras.layers.Conv2D(filters = filters, kernel_size = (7,7),strides = (2,2), activation = "relu",padding = "same")
+        #self.pool1  = tf.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2))
+        #  ****CHANGES TO :**** 
+        self.conv1 = tf.keras.layers.Conv2D(filters=filters, kernel_size = (3, 3), strides=1, activation='relu', padding='same')
+        # 
+
+        self.block1_1 = Block(filters)
+        self.block1_2 = Block(filters)
+        if self.model_name == "resnet34":
+            self.block1_3 = Block(filters)
+
+        self.block2_1 = Block(filters << 1, 2, True)
+        self.block2_2 = Block(filters << 1)
+        if self.model_name == "resnet34":
+            self.block2_3 = Block(filters << 1)
+            self.block2_4 = Block(filters << 1)
+
+        self.block3_1 = Block(filters << 2, 2, True)
+        self.block3_2 = Block(filters << 2)
+        if self.model_name == "resnet34":
+            self.block3_3 = Block(filters << 2)
+            self.block3_4 = Block(filters << 2)
+            self.block3_5 = Block(filters << 2)
+            self.block3_6 = Block(filters << 2)
+
+        self.block4_1 = Block(filters << 3, 2, True)
+        self.block4_2 = Block(filters << 3)
+        if self.model_name == "resnet34":
+            self.block4_3 = Block(filters << 3)
+
+        self.pool = tf.keras.layers.GlobalAveragePooling2D()
+        self.fc   = tf.keras.layers.Dense(units = classes, activation ="softmax")
+
+    def call(self, inputs, training = None):
+        # Backbone
+        x = inputs
         x = self.conv1(x)
-        x = self.bn1(x)
-        x = layers.ReLU()(x)
-        x = self.conv2(x)
-        x = self.bn2(x)
-        x = layers.ReLU()(x)
-        x = self.conv3(x)
-        x = self.bn3(x)
-        x = layers.Add()([x, residual])
-        x = layers.ReLU()(x)
-        return x 
+        #x = self.pool1(x)
 
+        x = self.block1_1(x)
+        x = self.block1_2(x)
+        if self.model_name == "resnet34":
+            x = self.block1_3(x)
 
-class ResNet(tf.keras.Model):
-    
-    def __init__(self, block, num_blocks, num_classes=10, num_channels=3, input_size=32):
-        super(ResNet, self).__init__()
-        assert input_size in [32, 64]
-        self.in_planes = 64
-        self.num_channels = num_channels
+        x = self.block2_1(x)
+        x = self.block2_2(x)
+        if self.model_name == "resnet34":
+            x = self.block2_3(x)
+            x = self.block2_4(x)
 
-        self.conv1 = layers.Conv2D(64, (3,3), strides=1, padding='same', use_bias=False)
-        self.bn1 = layers.BatchNormalization(epsilon=0.00001, momentum=0.1)
-        self.relu = layers.ReLU()
-        self.layer1 = self._make_layer(block, 64, num_blocks[0], strides=1)
-        self.layer2 = self._make_layer(block, 128, num_blocks[1], strides=2)
-        self.layer3 = self._make_layer(block, 256, num_blocks[2], strides=2)
-        self.layer4 = self._make_layer(block, 512, num_blocks[3], strides=2)
-        self.pool = layers.AvgPool2D(pool_size=(4, 4))
-        self.flatten = layers.Flatten()
-        self.fc = layers.Dense(num_classes)
+        x = self.block3_1(x)
+        x = self.block3_2(x)
+        if self.model_name == "resnet34":
+            x = self.block3_3(x)
+            x = self.block3_4(x)
+            x = self.block3_5(x)
+            x = self.block3_6(x)
 
-    def _make_layer(self, block, planes, num_blocks, strides):
-        # first block in layer has stride 2, rest have stride 1
-        strides = [strides] + (num_blocks-1)*[1]
-        layers = []
-        for stride in strides:
-            layers.append(block(self.in_planes, planes, stride))
-            self.in_planes = planes * block.expansion
-        return tf.keras.Sequential(layers)
+        x = self.block4_1(x)
+        x = self.block4_2(x)
+        if self.model_name == "resnet34":
+            x = self.block4_3(x)
 
-    def call(self, x):
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        x = self.layer4(x)
+        # Top
         x = self.pool(x)
-        x = self.flatten(x)
-        logits = self.fc(x)
-        return logits
+        x = self.fc(x)
+        return x
 
-def ResNet18(num_classes, num_channels=3, input_size=32):
-    return ResNet(BasicBlock, [2,2,2,2], num_classes, num_channels=num_channels, 
-                  input_size=input_size)
+class Resnet_2(tf.keras.Model):
+    def __init__(self, classes, model_name = "resnet50", filters = 64):
+        super(Resnet_2,self).__init__()
+        self.model_name = model_name
 
+        self.conv1 = tf.keras.layers.Conv2D(filters = filters, kernel_size = (7,7),strides = (2,2), activation = "relu",padding = "same")
+        self.pool1  = tf.keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2))
 
-def ResNet34(num_classes):
-    return ResNet(BasicBlock, [3,4,6,3], num_classes)
+        self.block1_1 = bottleneck(filters, 1, True)
+        self.block1_2 = bottleneck(filters)
+        self.block1_3 = bottleneck(filters)
 
+        self.block2_1 = bottleneck(filters << 1, 2, True)
+        self.block2_2 = bottleneck(filters << 1)
+        self.block2_3 = bottleneck(filters << 1)
+        self.block2_4 = bottleneck(filters << 1)
+        if self.model_name == "resnet152":
+            self.block2_5 = bottleneck(filters << 1)
+            self.block2_6 = bottleneck(filters << 1)
+            self.block2_7 = bottleneck(filters << 1)
+            self.block2_8 = bottleneck(filters << 1)
 
-def ResNet50(num_classes):
-    return ResNet(Bottleneck, [3,4,6,3], num_classes)
+        self.block3_1  = bottleneck(filters << 2, 2, True)
+        self.block3_2  = bottleneck(filters << 2)
+        self.block3_3  = bottleneck(filters << 2)
+        self.block3_4  = bottleneck(filters << 2)
+        self.block3_5  = bottleneck(filters << 2)
+        self.block3_6  = bottleneck(filters << 2)
+        if self.model_name != "resnet50":
+            self.block3_7  = bottleneck(filters << 2)
+            self.block3_8  = bottleneck(filters << 2)
+            self.block3_9  = bottleneck(filters << 2)
+            self.block3_10 = bottleneck(filters << 2)
+            self.block3_11 = bottleneck(filters << 2)
+            self.block3_12 = bottleneck(filters << 2)
+            self.block3_13 = bottleneck(filters << 2)
+            self.block3_14 = bottleneck(filters << 2)
+            self.block3_15 = bottleneck(filters << 2)
+            self.block3_16 = bottleneck(filters << 2)
+            self.block3_17 = bottleneck(filters << 2)
+            self.block3_18 = bottleneck(filters << 2)
+            self.block3_19 = bottleneck(filters << 2)
+            self.block3_20 = bottleneck(filters << 2)
+            self.block3_21 = bottleneck(filters << 2)
+            self.block3_22 = bottleneck(filters << 2)
+            self.block3_23 = bottleneck(filters << 2)
+            if self.model_name == "resnet152":
+                self.block3_24 = bottleneck(filters << 2)
+                self.block3_25 = bottleneck(filters << 2)
+                self.block3_26 = bottleneck(filters << 2)
+                self.block3_27 = bottleneck(filters << 2)
+                self.block3_28 = bottleneck(filters << 2)
+                self.block3_29 = bottleneck(filters << 2)
+                self.block3_30 = bottleneck(filters << 2)
+                self.block3_31 = bottleneck(filters << 2)
+                self.block3_32 = bottleneck(filters << 2)
+                self.block3_33 = bottleneck(filters << 2)
+                self.block3_34 = bottleneck(filters << 2)
+                self.block3_35 = bottleneck(filters << 2)
+                self.block3_36 = bottleneck(filters << 2)
 
+        self.block4_1 = bottleneck(filters << 3, 2, True)
+        self.block4_2 = bottleneck(filters << 3)
+        self.block4_3 = bottleneck(filters << 3)
 
-def ResNet101(num_classes):
-    return ResNet(Bottleneck, [3,4,23,3], num_classes)
+        self.pool = tf.keras.layers.GlobalAveragePooling2D()
+        self.fc   = tf.keras.layers.Dense(units = classes, activation ="softmax")
 
+    def call(self, inputs, training = None):
+        # Backbone
+        x = inputs
+        x = self.conv1(x)
+        x = self.pool1(x)
 
-def ResNet152(num_classes):
-    return ResNet(Bottleneck, [3,8,36,3], num_classes)
+        x = self.block1_1(x)
+        x = self.block1_2(x)
+        x = self.block1_3(x)
+
+        x = self.block2_1(x)
+        x = self.block2_2(x)
+        x = self.block2_3(x)
+        x = self.block2_4(x)
+        if self.model_name == "resnet152":
+            x = self.block2_5(x)
+            x = self.block2_6(x)
+            x = self.block2_7(x)
+            x = self.block2_8(x)
+
+        x = self.block3_1(x)
+        x = self.block3_2(x)
+        x = self.block3_3(x)
+        x = self.block3_4(x)
+        x = self.block3_5(x)
+        x = self.block3_6(x)
+        if self.model_name != "resnet50":
+            x = self.block3_7(x)
+            x = self.block3_8(x)
+            x = self.block3_9(x)
+            x = self.block3_10(x)
+            x = self.block3_11(x)
+            x = self.block3_12(x)
+            x = self.block3_13(x)
+            x = self.block3_14(x)
+            x = self.block3_15(x)
+            x = self.block3_16(x)
+            x = self.block3_17(x)
+            x = self.block3_18(x)
+            x = self.block3_19(x)
+            x = self.block3_20(x)
+            x = self.block3_21(x)
+            x = self.block3_22(x)
+            x = self.block3_23(x)
+            if self.model_name == "resnet152":
+                x = self.block3_24(x)
+                x = self.block3_25(x)
+                x = self.block3_26(x)
+                x = self.block3_27(x)
+                x = self.block3_28(x)
+                x = self.block3_29(x)
+                x = self.block3_30(x)
+                x = self.block3_31(x)
+                x = self.block3_32(x)
+                x = self.block3_33(x)
+                x = self.block3_34(x)
+                x = self.block3_35(x)
+                x = self.block3_36(x)
+
+        x = self.block4_1(x)
+        x = self.block4_2(x)
+        x = self.block4_3(x)
+
+        # Top
+        x = self.pool(x)
+        x = self.fc(x)
+        return x
+
+#------------------------------------------------------------------------------
+def ResNet18(input_shape, classes, filters = 64):
+    model = Resnet_1(classes, "resnet18", filters)
+    model.build(input_shape = input_shape)
+    return model
+
+def ResNet34(input_shape, classes, filters = 64):
+    model = Resnet_1(classes, "resnet34", filters)
+    model.build(input_shape = input_shape)
+    return model
+
+def ResNet50(input_shape, classes, filters = 64):
+    model = Resnet_2(classes, "resnet50", filters)
+    model.build(input_shape = input_shape)
+    return model
+
+def ResNet101(input_shape, classes, filters = 64):
+    model = Resnet_2(classes, "resnet101", filters)
+    model.build(input_shape = input_shape)
+    return model
+
+def ResNet152(input_shape, classes, filters = 64):
+    model = Resnet_2(classes, "resnet152", filters)
+    model.build(input_shape = input_shape)
+    return model
+

@@ -4,6 +4,8 @@ import tensorflow_addons as tfa
 import hydra
 from omegaconf import DictConfig
 
+from src.datasets.dataloader_factory import get_data_loader
+
 from src.models.resnet_small_version2 import ResNet18
 from src.models.layers import Identity
 from src.datasets import cifar_10
@@ -52,15 +54,48 @@ viewmaker_loss_weight=1.0, distortion_budget=0.05):
 
 @hydra.main(config_path = CONFIG_PATH, config_name = CONFIG_NAME)
 def train(args: DictConfig) -> None:
-    
-    dataset = cifar_10.get_unsupervised_dataset(args.batch_size)
 
-    model = build_model(
-        (None, 32, 32, 3), 
-        args.temperature,
-        args.embedding_dim,
-        load_filepath = args.load_filepath
+    # ==========================
+    # Dataset for pretraining
+    # ==========================    
+    dataloader = get_data_loader(args.dataset_name)
+
+    (dataset, _), (_, _) = dataloader.get_dataset()
+    dataset = dataset.batch(args.pretrain.batch_size)
+    dataset = dataset.take(len(dataset)-1)
+
+    # ==========================
+    # 
+
+    input_shape = 
+    encoder = ResNet18(
+        input_shape = args.model.input_shape,
+        classes=10
     )
+
+    encoder.fc = Identity()
+
+    projection_head = tf.keras.layers.Dense(args.model.embedding_dim)
+
+    preprocessing_layer = cifar_10.get_preprocessing_layer()
+
+    viewmaker = Viewmaker(
+        num_channels = input_shape[-1],
+        distortion_budget = distortion_budget
+    )
+
+    model = SimCLR_adversarial(
+        encoder, 
+        preprocessing_layer, 
+        viewmaker, 
+        projection_head,
+        temperature=temperature, 
+        viewmaker_loss_weight = viewmaker_loss_weight
+    )
+
+
+    model.build(input_shape=input_shape)
+
 
     optimizer = tfa.optimizers.SGDW(
         learning_rate = args.learning_rate,

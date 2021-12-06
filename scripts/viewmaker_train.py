@@ -5,7 +5,7 @@ import hydra
 import os, shutil
 from omegaconf import DictConfig
 
-from src.datasets.dataloader_factory import get_data_loader
+from src.datasets.data_loading import get_data_loader
 
 from src.models.resnet_small import ResNet18
 from src.models.layers import Identity

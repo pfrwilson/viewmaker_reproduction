@@ -1,0 +1,37 @@
+
+
+# dataset
+data:
+  dataset_name: cifar_10
+
+# model 
+model: 
+  embedding_dim: 128
+  temperature: 0.50
+  viewmaker_loss_weight: 1.0 
+  distortion_budget: 0.05
+
+# unsupervised pretraining:
+pretrain:
+  optimizer_name: 'sgd'
+  learning_rate: 0.03
+  weight_decay: 1.0e-5
+  momentum: 0.9
+  epochs: 200
+  batch_size: 256
+
+# supervised finetuning
+transfer:
+  optimizer_name: 'sgd'
+  learning_rate: 0.01
+  weight_decay: 0.0
+  momentum: 0.9
+  epochs: 100
+  batch_size: 256
+
+# evaluation
+evaluation:
+  batch_size: 256
+
+# save/load
+experiment_directory: /path/to/experiment/directory

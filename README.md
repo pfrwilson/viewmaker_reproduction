@@ -54,3 +54,5 @@ python scripts/sim_clr_pretrain.py --save_filepath 'model_weights.h5' --params_f
 ## Evaluation
 
 TBA
+
+.

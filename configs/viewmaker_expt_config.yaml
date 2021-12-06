@@ -34,4 +34,4 @@ evaluation:
   batch_size: 256
 
 # save/load
-experiment_directory: /path/to/experiment/directory
+experiment_directory: C:\Users\Paul\viewmaker_reproduction\experiments\test_expt

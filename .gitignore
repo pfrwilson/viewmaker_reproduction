@@ -7,3 +7,4 @@ outputs/
 *.h5
 sample_params.txt
 venv
+experiments/

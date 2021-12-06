@@ -1,10 +1,11 @@
 import tensorflow as tf
-from src.datasets.data_loading import DataLoader
+from src.datasets.data_loader import DataLoader
 
 MNIST_STATISTICS = {
     'mean': 0.1306604762738429,
     'std': 0.3081078038564622
 }
+
 
 class MNIST(DataLoader):
 
@@ -18,7 +19,7 @@ class MNIST(DataLoader):
         x_test = x_test/255.        
 
     def get_augmentation_layer(self) -> tf.keras.layers.Layer:
-        #TODO make augmentation layer
+        # TODO make augmentation layer
         raise NotImplementedError()
 
     def get_preprocessing_layer(self) -> tf.keras.layers.Layer:
@@ -26,6 +27,7 @@ class MNIST(DataLoader):
         class PreprocessingLayer(tf.keras.layers.Layer):
             def __init__(self) -> None:
                 super().__init__()
+
             def call(self, x):
                 x = (x - MNIST_STATISTICS['mean'])/MNIST_STATISTICS['std']
                 return x

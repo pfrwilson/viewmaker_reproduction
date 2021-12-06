@@ -1,5 +1,5 @@
 import tensorflow as tf
-from src.datasets.data_loading import DataLoader
+from src.datasets.data_loader import DataLoader
 from src.utils.SimCLR_data_util import preprocess_for_train
 
 CIFAR_10_STATISTICS = {

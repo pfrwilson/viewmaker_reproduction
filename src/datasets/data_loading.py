@@ -10,7 +10,6 @@ def get_data_loader(dataset_name):
     Factory method for getting a DataLoader instance
     """
 
-
     if dataset_name == 'cifar_10':
         return CIFAR10()
 

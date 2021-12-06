@@ -2,10 +2,12 @@ import tensorflow as tf
 from src.datasets.data_loader import DataLoader
 from src.utils.SimCLR_data_util import preprocess_for_train
 
+
 CIFAR_10_STATISTICS = {
     'mean': [0.49139968, 0.48215841, 0.44653091],
     'std': [0.24703223, 0.24348513, 0.26158784]
 }
+
 
 class CIFAR10(DataLoader):
     
@@ -48,6 +50,7 @@ class CIFAR10(DataLoader):
                 x = (x - CIFAR_10_STATISTICS['mean'])/CIFAR_10_STATISTICS['std']
                 return x
 
+        return PreprocessingLayer()
                 
 
         

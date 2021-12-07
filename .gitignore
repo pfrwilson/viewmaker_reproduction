@@ -8,3 +8,5 @@ outputs/
 sample_params.txt
 venv
 experiments/
+configs/
+.gitignore

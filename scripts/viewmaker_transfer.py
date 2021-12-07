@@ -43,10 +43,11 @@ def main(args: DictConfig) -> None:
     # ==========================
     dataloader = get_data_loader(args.data.dataset_name)
 
-    (x_train, y_train), (x_test, y_test) = dataloader.get_dataset()
-    input_shape = x_train.shape[1:]
+    train, test = dataloader.get_dataset()
+    X, y = next(iter(train))     # single example
+    input_shape = X.shape[:]
     input_shape = (None, *input_shape)  # include None for batch dimension
-    num_classes = y_train.shape[1]
+    num_classes = y.shape[0]
 
     # =======================
     # Build transfer model
@@ -112,12 +113,10 @@ def main(args: DictConfig) -> None:
     )
 
     transfer_model.fit(
-        x=x_train,
-        y=y_train,
-        batch_size=args.transfer.batch_size,
+        train.batch(args.transfer.batch_size),
+        validation_data=test.batch(args.transfer.batch_size),
         epochs=args.transfer.epochs,
         callbacks=[tensorboard_callback],
-        validation_split=0.2
     )
 
     transfer_model.save_weights(
@@ -129,8 +128,7 @@ def main(args: DictConfig) -> None:
     # ==============================
 
     eval_dict = transfer_model.evaluate(
-        x_test,
-        y_test,
+        test.batch(args.evaluation.batch_size),
         return_dict=True
     )
 

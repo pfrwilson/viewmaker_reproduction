@@ -11,7 +11,6 @@ from src.models.resnet_small import ResNet18
 from src.models.layers import Identity
 from src.models.SimCLR import SimCLR_adversarial
 from src.models.viewmaker_new import Viewmaker
-from src.models.transfer_learning import TransferModel
 
 os.chdir('..')
 CONFIG_PATH: str = os.path.join(os.getcwd(), 'configs')
@@ -43,10 +42,10 @@ def main(args: DictConfig) -> None:
     # ==========================
     dataloader = get_data_loader(args.data.dataset_name)
 
-    (x_train, y_train), (x_test, y_test) = dataloader.get_dataset()
-    input_shape = x_train.shape[1:]
+    x_train = dataloader.get_dataset_for_pretraining()
+    input_shape = dataloader.get_input_shape()
     input_shape = (None, *input_shape)  # include None for batch dimension
-    num_classes = y_train.shape[1]
+    num_classes = dataloader.get_num_classes()
 
     # ==========================
     # Pretrainable Model
@@ -78,6 +77,10 @@ def main(args: DictConfig) -> None:
 
     model.build(input_shape=input_shape)
 
+    print(encoder.summary())
+    print(f'input shape: {input_shape}')
+    print(f'num classes: {num_classes}')
+
     # ========================
     # Unsupervised Pretraining
     # ========================
@@ -95,9 +98,8 @@ def main(args: DictConfig) -> None:
         os.path.join(expt_dir, 'pretrain_log')
     )
 
-    dataset = tf.data.Dataset.from_tensor_slices(x_train)
-    dataset = dataset.batch(args.pretrain.batch_size)
-    dataset = dataset.take(len(dataset) - 1)
+    dataset = x_train.batch(args.pretrain.batch_size)
+    dataset = dataset.take(len(dataset) - 1)        # drop the last data batch since batch size must be always the same
 
     model.fit(dataset, epochs=args.pretrain.epochs, callbacks=[tensorboard_callback])
 

@@ -13,7 +13,7 @@ from src.models.SimCLR import SimCLR_adversarial
 from src.models.viewmaker_new import Viewmaker
 
 os.chdir('..')
-CONFIG_PATH: str = os.path.join(os.getcwd(), 'configs')
+CONFIG_PATH: str = os.path.join(os.getcwd(), 'viewmaker_reproduction/configs')
 CONFIG_NAME: str = 'viewmaker_expt_config.yaml'
 
 

@@ -76,6 +76,7 @@ class SimCLR(tf.keras.Model):
         accuracy = tf.reduce_sum(tf.cast(tf.equal(predictions, labels), 'int32'))/(n_labels)
         return accuracy
 
+
 class SimCLR_adversarial(SimCLR):
     
     def __init__(

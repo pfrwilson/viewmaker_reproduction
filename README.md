@@ -64,3 +64,4 @@ save the weights for the encoder, viewmaker, and classifier networks. The config
 file will be copied into the experiment directory for documentation, and a file `evaluation_log.txt'
 will be created measuring the final performance of the classifier. 
 
+

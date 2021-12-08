@@ -2,7 +2,7 @@
 
 # dataset
 data:
-  dataset_name: mnist
+  dataset_name: speech_commands
 
 # model 
 model: 

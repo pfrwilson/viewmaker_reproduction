@@ -1,6 +1,13 @@
-tensorflow==2.6
+tensorflow==2.7.0
 matplotlib
-numpy
+numpy~=1.19.5
 tensorflow-lattice
 tensorflow-addons
-hydra-core 
+hydra-core
+omegaconf~=2.1.1
+einops
+pydub
+ffmpeg
+scipy
+tensorflow-datasets
+

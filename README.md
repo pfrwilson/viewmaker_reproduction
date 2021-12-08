@@ -21,37 +21,47 @@ Complete environment setup:
 ```setup
 git clone https://github.com/pfrwilson/viewmaker_reproduction
 cd viewmaker_reproduction
-conda create -n my_env
-conda activate my_env
-pip install -r requrements.txt
-source init_env.sh
+python -m venv venv
+venv/bin/activate
+pip install -r requirements.txt
+export PYTHONPATH=$(cwd)
 ```
 
+## Training and Evaluation
 
-## Training
+Training is performed in two steps - unsupervised pre-training and supervised transfer learning.
+The unsupervised pre-training trains an encoder network (together with a trainable viewmaker network) 
+using the sim-clr objective. The transfer learning task is to take the trained encoder and
+viewmaker, add a classification network on top of the frozen models, and train the classification 
+module to perform the supervised learning task. 
 
-Training is performed in two steps - unsupervised pre-training and supervised transfer learning. The unsupervised pre-training trains an encoder network (together with a trainable viewmaker network) using the sim-clr objective. The transfer learning task is to take the trained encoder and viewmaker, add a classification network on top of the frozen models, and train the classification module to perform the supervised learning task. 
+we provide scripts for pretraining and transfer learning in the `scripts` directory :
 
-So far, we have provided 4 experiment scripts:
-- `sim_clr_pretrain`
-- `sim_clr_transfer` - coming soon
-- `viewmaker_pretrain` - coming soon
-- `viewmaker_transfer` - coming soon
+`viewmaker_pretrain.py`, `viewmaker_transfer.py`
 
-These scripts cover pretraining and transfer learning for the original sim_clr model and for the sim_clr model with additional adversarially trainable viewmaker as presented in the original paper. 
+To run training, we need to provide the experimental configurations in the yaml
+file `configs/viewmaker_expt_config.yaml`. The file comes with default model and
+hyperparameter settings used in the original paper. To run an experiment, we need only
+provide a directory in which to record logs and save weights. To do this, make a directory 
+and provide the full path in line 37 ('experiment_directory') of the yaml.
 
-The scripts come equipped with default settings to train on the cifar_10 dataset with the hyperparameters given in the experiments described in appendix 1.A. For pretraining, it is necessary to specify the directory into which the model's weights will be saved, and optionally one can specify a file (.h5 extension) from which to load the model weights (if you have partially trained the model and want to continue). For transfer learning, it is necessary to specify a directory to save the trained classifier and a directory from which to load the pre-trained model weights. To use a different experimental configuration, one can create a json-encoded dictionary file encoding the configuration parameters and pass its location as a command-line argument as well. See the script files for the defaults configuration and make sure to define every parameter in the configuration in the json file.
+We currently support a limited number of datasets. We can choose the dataset by passing a
+dataset name in the config file. The full list of supported datasets can be found in the
+`datasets/data_loader_factory.py` module. To add a new dataset, simply subclass the
+`datasets.dataloader.DataLoader` base class and add the dataset name and to the
+`datasets/dataset_loader_factory.py` file with the appropriate import. Then, change the dataset
+name in the config file.  
 
-Example training with defaults:
+Once we have provided an experiment directory, we can run the training via 
+```bash
+python scripts/viewmaker_pretrain.py 
+python scripts/viewmaker_trainser.py
 ```
-python scripts/sim_clr_pretrain.py --save_filepath 'model_weights.h5' 
-```
-Example training with custom params:
-``` 
-python scripts/sim_clr_pretrain.py --save_filepath 'model_weights.h5' --params_filepath 'sample_params.txt'
-```
 
-## Evaluation
+In the experiment directory, a log directory for the pretraining and transfer learning
+will be created that can be opened with tensorboard. A `.h5` file will be created to
+save the weights for the encoder, viewmaker, and classifier networks. The configuration
+file will be copied into the experiment directory for documentation, and a file `evaluation_log.txt'
+will be created measuring the final performance of the classifier. 
 
-TBA
 

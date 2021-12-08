@@ -3,9 +3,8 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 import hydra
 from omegaconf import DictConfig
-import argparse
 
-from src.models.resnet_small_version2 import ResNet18
+from src.models.resnet_small import ResNet18
 from src.models.layers import Identity
 from src.datasets import cifar_10
 from src.models.SimCLR import SimCLR

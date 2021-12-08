@@ -6,4 +6,6 @@ tensorflow-addons
 hydra-core
 omegaconf~=2.1.1
 einops
+pydub
+ffmpeg
 

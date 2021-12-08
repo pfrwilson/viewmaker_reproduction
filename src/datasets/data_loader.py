@@ -10,6 +10,7 @@ class DataLoader(ABC):
         return the shape of a training example X eg (32, 32, 3
         """
 
+    @abstractmethod
     def get_num_classes(self):
         """"
         return the number of classes for the training example y.

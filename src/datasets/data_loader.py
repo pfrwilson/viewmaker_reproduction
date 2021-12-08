@@ -12,7 +12,7 @@ class DataLoader(ABC):
 
     @abstractmethod
     def get_num_classes(self):
-        """"
+        """
         return the number of classes for the training example y.
         """
 

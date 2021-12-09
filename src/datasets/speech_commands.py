@@ -17,6 +17,9 @@ class SpeechCommands(DataLoader):
     def get_num_classes(self):
         return 10
 
+    def get_dataset_for_pretraining_length(self):
+        return 85511
+
     def get_dataset_for_pretraining(self):
         def datagen():
             for example in self.data['train']:

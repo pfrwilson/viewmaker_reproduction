@@ -16,6 +16,11 @@ class DataLoader(ABC):
         return the number of classes for the training example y.
         """
 
+    def get_dataset_for_pretraining_length(self):
+        """
+        return the number of training examples in the pretraining dataset
+        """
+
     @abstractmethod
     def get_dataset_for_pretraining(self):
         """

@@ -26,6 +26,9 @@ class MNIST(DataLoader):
     def get_num_classes(self):
         return 10
 
+    def get_dataset_for_pretraining_length(self):
+        return len(self.get_dataset_for_pretraining())
+
     def get_dataset_for_pretraining(self):
         (x_train, _), (_, _) = self.data
         return tf.data.Dataset.from_tensor_slices(x_train)

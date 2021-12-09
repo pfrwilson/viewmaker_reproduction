@@ -60,7 +60,7 @@ class SpeechCommands(DataLoader):
 
     @staticmethod
     def _pad_to(signal, length):
-        diff = len(signal) - length
+        diff = length - len(signal)
         if diff > 0:
             signal = np.pad(signal, (0, diff))
         return signal

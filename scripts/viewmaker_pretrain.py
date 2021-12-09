@@ -43,6 +43,7 @@ def main(args: DictConfig) -> None:
     dataloader = get_data_loader(args.data.dataset_name)
 
     x_train = dataloader.get_dataset_for_pretraining()
+
     input_shape = dataloader.get_input_shape()
     input_shape = (None, *input_shape)  # include None for batch dimension
     num_classes = dataloader.get_num_classes()
@@ -98,8 +99,10 @@ def main(args: DictConfig) -> None:
         os.path.join(expt_dir, 'pretrain_log')
     )
 
+    num_training_examples = dataloader.get_dataset_for_pretraining_length()
+    num_batches = num_training_examples//args.pretrain.batch_size  # include only batches of EXACTLY size batch_size
     dataset = x_train.batch(args.pretrain.batch_size)
-    dataset = dataset.take(len(dataset) - 1)        # drop the last data batch since batch size must be always the same
+    dataset = dataset.take(num_batches)
 
     model.fit(dataset, epochs=args.pretrain.epochs, callbacks=[tensorboard_callback])
 

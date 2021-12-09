@@ -30,7 +30,7 @@ class SpeechCommands(DataLoader):
         return tf.data.Dataset.from_generator(datagen, output_types=output_type, output_shapes=output_shape)
 
     def get_dataset(self):
-        
+
         def train_datagen():
             for example in self.data['train']:
                 yield SpeechCommands._preprocess(example)
@@ -72,5 +72,5 @@ class SpeechCommands(DataLoader):
         label = example['label'].numpy()
         image = SpeechCommands._convert_to_spectrogram(signal)
         label = tf.one_hot(label - 1, depth=11)
-        return signal, label
+        return image, label
 

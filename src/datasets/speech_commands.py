@@ -23,7 +23,8 @@ class SpeechCommands(DataLoader):
     def get_dataset_for_pretraining(self):
         def datagen():
             for example in self.data['train']:
-                signal = example['audio']
+                signal = np.zeros(shape=(16000,), dtype='float32')
+                signal = signal + example['audio']
                 image = self.convert_to_spectrogram(signal)
                 yield image
         output_type = tf.float32
@@ -32,7 +33,8 @@ class SpeechCommands(DataLoader):
 
     def get_dataset(self):
         def preprocess(example):
-            signal = example['audio']
+            signal = np.zeros(shape=(16000,), dtype='float32')
+            signal = signal + example['audio']
             label = example['label'].numpy()
             image = self.convert_to_spectrogram(signal)
             label = tf.one_hot(label-1, depth=11)

@@ -23,30 +23,21 @@ class SpeechCommands(DataLoader):
     def get_dataset_for_pretraining(self):
         def datagen():
             for example in self.data['train']:
-                signal = np.zeros(shape=(16000,), dtype='float32')
-                signal = signal + example['audio']
-                image = self.convert_to_spectrogram(signal)
+                image, label = SpeechCommands._preprocess(example)
                 yield image
         output_type = tf.float32
         output_shape = tf.TensorShape((129, 71, 1))
         return tf.data.Dataset.from_generator(datagen, output_types=output_type, output_shapes=output_shape)
 
     def get_dataset(self):
-        def preprocess(example):
-            signal = np.zeros(shape=(16000,), dtype='float32')
-            signal = signal + example['audio']
-            label = example['label'].numpy()
-            image = self.convert_to_spectrogram(signal)
-            label = tf.one_hot(label-1, depth=11)
-            return signal, label
-
+        
         def train_datagen():
             for example in self.data['train']:
-                yield preprocess(example)
+                yield SpeechCommands._preprocess(example)
 
         def test_datagen():
             for example in self.data['test']:
-                yield preprocess(example)
+                yield SpeechCommands._preprocess(example)
 
         ot = tf.float32, tf.float32
         os = tf.TensorShape((129, 71, 1)), tf.TensorShape((11,))
@@ -62,7 +53,24 @@ class SpeechCommands(DataLoader):
         return tf.keras.layers.Resizing(64, 64)
 
     @staticmethod
-    def convert_to_spectrogram(signal):
+    def _convert_to_spectrogram(signal):
         image = scipy.signal.spectrogram(signal)[2]
         image = np.expand_dims(image, 2)  # add channel dim
         return image
+
+    @staticmethod
+    def _pad_to(signal, length):
+        diff = len(signal) - length
+        if diff > 0:
+            signal = np.pad(signal, (0, diff))
+        return signal
+
+    @staticmethod
+    def _preprocess(example):
+        signal = example['audio']
+        signal = SpeechCommands._pad_to(signal, 60000)
+        label = example['label'].numpy()
+        image = SpeechCommands._convert_to_spectrogram(signal)
+        label = tf.one_hot(label - 1, depth=11)
+        return signal, label
+

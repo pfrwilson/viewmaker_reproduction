@@ -68,7 +68,7 @@ class SpeechCommands(DataLoader):
     @staticmethod
     def _preprocess(example):
         signal = example['audio']
-        signal = SpeechCommands._pad_to(signal, 60000)
+        signal = SpeechCommands._pad_to(signal, 16000)
         label = example['label'].numpy()
         image = SpeechCommands._convert_to_spectrogram(signal)
         label = tf.one_hot(label - 1, depth=11)

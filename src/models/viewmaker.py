@@ -3,10 +3,12 @@ import tensorflow_addons as tfa
 #import tensorflow_lattice as tfl
 import numpy as np
 
+
 ACTIVATIONS = {
     'relu': tf.keras.layers.ReLU,
     'leaky_relu': tf.keras.layers.LeakyReLU,
 }
+
 
 class Viewmaker(tf.keras.Model):
     def __init__(self, num_channels=3, distortion_budget=0.05, activation='relu',
@@ -135,6 +137,7 @@ class Viewmaker(tf.keras.Model):
 
         return result
 
+
 class ConvLayer(tf.keras.layers.Layer):
     def __init__(self, in_channels, out_channels, kernel_size, stride):
         super(ConvLayer, self).__init__()
@@ -148,6 +151,7 @@ class ConvLayer(tf.keras.layers.Layer):
     def call(self, x):
         # out = self.reflection_pad(x)
         return self.conv2d(x)
+
 
 class ResidualBlock(tf.keras.layers.Layer):
     """ResidualBlock
@@ -169,6 +173,7 @@ class ResidualBlock(tf.keras.layers.Layer):
         out = self.in2(self.conv2(out))
         out = out + residual
         return out
+
 
 class UpsampleConvLayer(tf.keras.layers.Layer):
     """UpsampleConvLayer

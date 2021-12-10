@@ -4,7 +4,6 @@ from src.models.layers import Identity
 import tensorflow_addons as tfa
 
 
-
 class RandomNoise(tf.keras.layers.Layer):
     """concatenates the input with a layer of random noise along channel axis"""
     

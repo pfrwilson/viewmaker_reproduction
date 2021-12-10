@@ -10,7 +10,7 @@ from src.datasets.data_loader_factory import get_data_loader
 from src.models.resnet_small import ResNet18
 from src.models.layers import Identity
 from src.models.SimCLR import SimCLR_adversarial
-from src.models.viewmaker_new import Viewmaker
+from src.models.viewmaker import Viewmaker
 from src.models.transfer_learning import TransferModel
 
 os.chdir('..')

@@ -1,5 +1,8 @@
 # Viewmaker Networks: A Reproducibility Study
 
+![Default Augmentations for CIFAR--10](img/cifar_10_expert.png?raw=true "Title")
+
+
 This repository contains a reproduction of the paper [Viewmaker Networks: Learning Views for Unsupervised Representation Learning ](https://arxiv.org/abs/2010.07432). 
 
 ## Requirements

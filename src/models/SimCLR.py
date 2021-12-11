@@ -157,6 +157,7 @@ class SimCLR_adversarial(SimCLR):
         accuracy = self._compute_accuracy(labels, predictions)
 
         return {'SimCLR loss': loss,
+                'viewmaker_loss': viewmaker_loss,
                 'SimCLR accuracy': accuracy}
 
 

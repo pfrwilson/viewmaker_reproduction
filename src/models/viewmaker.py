@@ -146,7 +146,8 @@ class ConvLayer(tf.keras.layers.Layer):
         self.conv2d = tf.keras.layers.Conv2D(out_channels,
                                             kernel_size,
                                             stride,
-                                            padding="same")
+                                            padding="same",
+                                            kernel_initializer="he_uniform")
 
     def call(self, x):
         # out = self.reflection_pad(x)
@@ -190,6 +191,7 @@ class UpsampleConvLayer(tf.keras.layers.Layer):
         self.conv2d = tf.keras.layers.Conv2D(out_channels, 
                                             kernel_size, 
                                             stride,
+                                            kernel_initializer='he_uniform'
                                         )
 
     def call(self, x):
